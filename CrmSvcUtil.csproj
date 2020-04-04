@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!--Project was exported from assembly: C:\Users\dmitriy.ponomarev\AppData\Roaming\MscrmTools\XrmToolBox\NugetPlugins\DLaB.Xrm.EarlyBoundGenerator.1.2019.3.19\lib\net462\plugins\DLaB.EarlyBoundGenerator\CrmSvcUtil.exe-->
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -98,13 +97,13 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ICommandLineArgumentSource.cs" />
     <Compile Include="CrmSvcUtilParameters.cs" />
     <Compile Include="MethodTracer.cs" />
     <Compile Include="CrmSvcUtil.cs" />
     <Compile Include="ArgumentType.cs" />
     <Compile Include="CommandLineArgument.cs" />
     <Compile Include="CommandLineArgumentAttribute.cs" />
+    <Compile Include="ICommandLineArgumentSource.cs" />
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="IOrganizationMetadata.cs" />
     <Compile Include="OrganizationMetadata.cs" />
@@ -119,12 +118,8 @@
     <Compile Include="SdkMessageResponseField.cs" />
     <Compile Include="SdkMessages.cs" />
     <Compile Include="MessagePagingInfo.cs" />
-    <Compile Include="ICustomizeCodeDomService.cs" />
     <Compile Include="CodeDomCustomizationService.cs" />
-    <Compile Include="ICodeGenerationService.cs" />
     <Compile Include="CodeGenerationService.cs" />
-    <Compile Include="ICodeWriterFilterService.cs" />
-    <Compile Include="ICodeWriterMessageFilterService.cs" />
     <Compile Include="CodeWriterFilterService.cs" />
     <Compile Include="DeviceIdManager.cs" />
     <Compile Include="LiveIdConstants.cs" />
@@ -137,31 +132,21 @@
     <Compile Include="DeviceRegistrationResponseError.cs" />
     <Compile Include="LiveDevice.cs" />
     <Compile Include="DeviceUserName.cs" />
-    <Compile Include="IMetadataProviderQueryService.cs" />
-    <Compile Include="MetadataProviderQueryService.cs" />
     <Compile Include="StaticNamingService.cs" />
-    <Compile Include="INamingService.cs" />
     <Compile Include="NamingService.cs" />
-    <Compile Include="IMetadataProviderService.cs" />
-    <Compile Include="IMetadataProviderService2.cs" />
     <Compile Include="SdkMetadataProviderService.cs" />
     <Compile Include="ServiceFactory.cs" />
     <Compile Include="ServiceProvider.cs" />
-    <Compile Include="ITypeMappingService.cs" />
     <Compile Include="TypeMappingService.cs" />
     <Compile Include="CodeGenerationType.cs" />
-    <Compile Include="TraceLogger.cs" />
-    <Compile Include="interactivelogin\crminteractivelogin.xaml.cs" />
+    <Compile Include="ICodeGenerationService.cs" />
+    <Compile Include="ICodeWriterFilterService.cs" />
+    <Compile Include="ICodeWriterMessageFilterService.cs" />
+    <Compile Include="ICustomizeCodeDomService.cs" />
+    <Compile Include="IMetadataProviderService.cs" />
+    <Compile Include="INamingService.cs" />
+    <Compile Include="ITypeMappingService.cs" />
     <Compile Include="AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="interactivelogin\crminteractivelogin.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

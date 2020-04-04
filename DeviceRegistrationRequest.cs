@@ -4,8 +4,8 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [XmlRoot("DeviceAddRequest")]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [XmlRoot("DeviceAddRequest")]
     public sealed class DeviceRegistrationRequest
     {
         public DeviceRegistrationRequest()

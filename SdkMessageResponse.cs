@@ -34,12 +34,23 @@ namespace Microsoft.Crm.Services.Utility
         {
             if (!result.SdkMessageResponseFieldPosition.HasValue)
                 return;
-            if (!this.ResponseFields.ContainsKey(result.SdkMessageResponseFieldPosition.Value))
+            Dictionary<int, SdkMessageResponseField> responseFields1 = this.ResponseFields;
+            int? responseFieldPosition = result.SdkMessageResponseFieldPosition;
+            int key1 = responseFieldPosition.Value;
+            if (!responseFields1.ContainsKey(key1))
             {
-                SdkMessageResponseField messageResponseField = new SdkMessageResponseField(result.SdkMessageResponseFieldPosition.Value, result.SdkMessageResponseFieldName, result.SdkMessageResponseFieldClrFormatter, result.SdkMessageResponseFieldValue);
-                this.ResponseFields.Add(result.SdkMessageResponseFieldPosition.Value, messageResponseField);
+                responseFieldPosition = result.SdkMessageResponseFieldPosition;
+                SdkMessageResponseField messageResponseField1 = new SdkMessageResponseField(responseFieldPosition.Value, result.SdkMessageResponseFieldName, result.SdkMessageResponseFieldClrFormatter, result.SdkMessageResponseFieldValue);
+                Dictionary<int, SdkMessageResponseField> responseFields2 = this.ResponseFields;
+                responseFieldPosition = result.SdkMessageResponseFieldPosition;
+                int key2 = responseFieldPosition.Value;
+                SdkMessageResponseField messageResponseField2 = messageResponseField1;
+                responseFields2.Add(key2, messageResponseField2);
             }
-            SdkMessageResponseField responseField = this.ResponseFields[result.SdkMessageResponseFieldPosition.Value];
+            Dictionary<int, SdkMessageResponseField> responseFields3 = this.ResponseFields;
+            responseFieldPosition = result.SdkMessageResponseFieldPosition;
+            int index = responseFieldPosition.Value;
+            SdkMessageResponseField messageResponseField = responseFields3[index];
         }
     }
 }

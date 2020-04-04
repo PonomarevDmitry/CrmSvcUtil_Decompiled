@@ -56,9 +56,13 @@ namespace Microsoft.Crm.Services.Utility
         private static void Serialize<T>(Stream stream, T value)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(T), string.Empty);
-            XmlSerializerNamespaces namespaces = new XmlSerializerNamespaces();
-            namespaces.Add(string.Empty, string.Empty);
-            xmlSerializer.Serialize(stream, (object)value, namespaces);
+            XmlSerializerNamespaces serializerNamespaces = new XmlSerializerNamespaces();
+            serializerNamespaces.Add(string.Empty, string.Empty);
+            Stream stream1 = stream;
+            // ISSUE: variable of a boxed type
+            var local = (object)value;
+            XmlSerializerNamespaces namespaces = serializerNamespaces;
+            xmlSerializer.Serialize(stream1, (object)local, namespaces);
         }
 
         private static T Deserialize<T>(Stream stream)

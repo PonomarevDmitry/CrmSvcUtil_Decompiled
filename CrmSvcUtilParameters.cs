@@ -1,6 +1,8 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 
@@ -10,6 +12,7 @@ namespace Microsoft.Crm.Services.Utility
     {
         private CommandLineParser _parser;
         private string _sdkUrl;
+        private string _solutionsPath;
         private string _language;
         private bool _generateMessages;
         private string _outputFile;
@@ -25,8 +28,6 @@ namespace Microsoft.Crm.Services.Utility
         private string _codeWriterFilterService;
         private string _codeWriterMessageFilterService;
         private string _metadataProviderService;
-        private string _metadataProviderService2;
-        private string _metadataQueryProvider;
         private string _namingService;
         private string _userName;
         private string _password;
@@ -47,6 +48,7 @@ namespace Microsoft.Crm.Services.Utility
             MethodTracer.Exit();
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Binary, "nologo", Description = "Suppresses the banner.")]
         internal bool NoLogo
         {
@@ -60,6 +62,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "language", Description = "The language to use for the generated proxy code.  This can be either 'CS' or 'VB'.  The default language is 'CS'.", ParameterDescription = "<language>", Shortcut = "l")]
         internal string Language
         {
@@ -75,6 +78,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Required, "url", Description = "A url or path to the SDK endpoint to contact for metadata.", ParameterDescription = "<url>", SampleUsageValue = "http://localhost/Organization1/XRMServices/2011/Organization.svc")]
         internal string Url
         {
@@ -88,6 +92,21 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
+        [CommandLineArgument(ArgumentType.Optional, "solutions", Description = "A path to a folder containing solutions to use.", ParameterDescription = "<solutions>", SampleUsageValue = ":$(BASEDIR)\\Drop\\Debug\\Amd64\\Master\\Solutions")]
+        internal string SolutionsPath
+        {
+            get
+            {
+                return this._solutionsPath;
+            }
+            set
+            {
+                this._solutionsPath = value;
+            }
+        }
+
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Required, "out", Description = "The filename for the generated proxy code.", ParameterDescription = "<filename>", SampleUsageValue = "GeneratedCode.cs", Shortcut = "o")]
         internal string OutputFile
         {
@@ -101,6 +120,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "namespace", Description = "The namespace for the generated proxy code.  The default namespace is the global namespace.", ParameterDescription = "<namespace>", Shortcut = "n")]
         internal string Namespace
         {
@@ -114,15 +134,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        [CommandLineArgument(ArgumentType.Optional | ArgumentType.Binary, "interactivelogin", Description = "Presents a login dialog to log into the service with, if passed all other connect info is ignored.", Shortcut = "il")]
-        public bool UseInteractiveLogin { get; set; }
-
-        [CommandLineArgument(ArgumentType.Optional, "connectionstring", Description = "Connection String to use when connecting to CRM. If provided, all other connect info is ignored.", Shortcut = "connstr")]
-        public string ConnectionString { get; set; }
-
-        [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "useoauth", Description = "when set, try to login with oAuth to CRM Online")]
-        public bool UseOAuth { get; set; }
-
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "username", Description = "Username to use when connecting to the server for authentication.", ParameterDescription = "<username>", Shortcut = "u")]
         internal string UserName
         {
@@ -136,6 +148,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "password", Description = "Password to use when connecting to the server for authentication.", ParameterDescription = "<password>", Shortcut = "p")]
         internal string Password
         {
@@ -149,6 +162,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "domain", Description = "Domain to authenticate against when connecting to the server.", ParameterDescription = "<domain>", Shortcut = "d")]
         internal string Domain
         {
@@ -162,6 +176,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "serviceContextName", Description = "The name for the generated service context. If a value is passed in, it will be used for the Service Context.  If not, no Service Context will be generated", ParameterDescription = "<service context name>")]
         internal string ServiceContextName
         {
@@ -175,6 +190,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "messageNamespace", Description = "Namespace of messages to generate.", ParameterDescription = "<message namespace>", Shortcut = "m")]
         internal string MessageNamespace
         {
@@ -188,6 +204,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Binary, "help", Description = "Show this usage message.", Shortcut = "?")]
         internal bool ShowHelp
         {
@@ -201,6 +218,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "codecustomization", Description = "Full name of the type to use as the ICustomizeCodeDomService", ParameterDescription = "<typename>")]
         internal string CodeCustomizationService
         {
@@ -214,6 +232,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "codewriterfilter", Description = "Full name of the type to use as the ICodeWriterFilterService", ParameterDescription = "<typename>")]
         internal string CodeWriterFilterService
         {
@@ -227,6 +246,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "codewritermessagefilter", Description = "Full name of the type to use as the ICodeWriterMessageFilterService", ParameterDescription = "<typename>")]
         internal string CodeWriterMessageFilterService
         {
@@ -240,6 +260,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "metadataproviderservice", Description = "Full name of the type to use as the IMetadataProviderService", ParameterDescription = "<typename>")]
         internal string MetadataProviderService
         {
@@ -253,19 +274,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "metadataproviderqueryservice", Description = "Full name of the type to use as the IMetaDataProviderQueryService", ParameterDescription = "<typename>")]
-        internal string MetadataQueryProvider
-        {
-            get
-            {
-                return this._metadataQueryProvider;
-            }
-            set
-            {
-                this._metadataQueryProvider = value;
-            }
-        }
-
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "codegenerationservice", Description = "Full name of the type to use as the ICodeGenerationService", ParameterDescription = "<typename>")]
         internal string CodeGenerationService
         {
@@ -279,6 +288,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "namingservice", Description = "Full name of the type to use as the INamingService", ParameterDescription = "<typename>")]
         internal string NamingService
         {
@@ -292,6 +302,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional | ArgumentType.Binary | ArgumentType.Hidden, "private", Description = "Generate unsupported classes", ParameterDescription = "<private>")]
         internal bool Private
         {
@@ -331,6 +342,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "deviceid", Description = "Device ID to use when connecting to the online server for authentication.", ParameterDescription = "<deviceid>", Shortcut = "di")]
         internal string DeviceID
         {
@@ -344,6 +356,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Called via reflection")]
         [CommandLineArgument(ArgumentType.Optional, "devicepassword", Description = "Device Password to use when connecting to the online server for authentication.", ParameterDescription = "<devicepassword>", Shortcut = "dp")]
         internal string DevicePassword
         {
@@ -357,12 +370,6 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "connectionprofilename", Description = "connection profile name used")]
-        public string ConnectionProfileName { get; set; }
-
-        [CommandLineArgument(ArgumentType.Optional | ArgumentType.Hidden, "connectionname", Description = "Application Name whose connection to use")]
-        public string ConnectionAppName { get; set; }
-
         internal IDictionary<string, string> ToDictionary()
         {
             if (this._parametersAsDictionary == null)
@@ -371,7 +378,7 @@ namespace Microsoft.Crm.Services.Utility
                 foreach (PropertyInfo property in typeof(CrmSvcUtilParameters).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
                     object[] customAttributes = property.GetCustomAttributes(typeof(CommandLineArgumentAttribute), false);
-                    if (customAttributes != null && customAttributes.Length > 0)
+                    if (customAttributes != null && customAttributes.Length != 0)
                     {
                         CommandLineArgumentAttribute argumentAttribute = (CommandLineArgumentAttribute)customAttributes[0];
                         object obj = property.GetValue((object)this, (object[])null);
@@ -397,7 +404,7 @@ namespace Microsoft.Crm.Services.Utility
         {
             get
             {
-                return this._unknownParameters.Count != 0 && string.IsNullOrWhiteSpace(this.CodeCustomizationService) && (string.IsNullOrWhiteSpace(this.CodeGenerationService) && string.IsNullOrWhiteSpace(this.MetadataQueryProvider)) && (string.IsNullOrWhiteSpace(this.CodeWriterFilterService) && string.IsNullOrWhiteSpace(this.CodeWriterMessageFilterService) && (string.IsNullOrWhiteSpace(this.MetadataProviderService) && string.IsNullOrWhiteSpace(this.NamingService)));
+                return this._unknownParameters.Count != 0 && string.IsNullOrWhiteSpace(this.CodeCustomizationService) && (string.IsNullOrWhiteSpace(this.CodeGenerationService) && string.IsNullOrWhiteSpace(this.CodeWriterFilterService)) && (string.IsNullOrWhiteSpace(this.CodeWriterMessageFilterService) && string.IsNullOrWhiteSpace(this.MetadataProviderService) && string.IsNullOrWhiteSpace(this.NamingService));
             }
         }
 
@@ -441,13 +448,13 @@ namespace Microsoft.Crm.Services.Utility
           string argumentName,
           string argumentValue)
         {
-            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("{0}: Found unknown argument {1}{2}.", (object)MethodBase.GetCurrentMethod().Name, (object)'/', (object)argumentName);
+            Trace.TraceInformation("{0}: Found unknown argument {1}{2}.", (object)MethodBase.GetCurrentMethod().Name, (object)'/', (object)argumentName);
             this._unknownParameters[argumentName] = argumentValue;
         }
 
         void ICommandLineArgumentSource.OnInvalidArgument(string argument)
         {
-            CrmSvcUtil.crmSvcUtilLogger.TraceError("Exiting {0}: Found string {1} in arguments array that could not be parsed.", (object)MethodBase.GetCurrentMethod().Name, (object)argument);
+            Trace.TraceError("Exiting {0}: Found string {1} in arguments array that could not be parsed.", (object)MethodBase.GetCurrentMethod().Name, (object)argument);
             throw new InvalidOperationException(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "Argument '{0}' could not be parsed.", (object)argument));
         }
     }

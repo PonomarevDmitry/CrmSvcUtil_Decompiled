@@ -1,11 +1,12 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [XmlRoot("Data")]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [XmlRoot("Data")]
     public sealed class LiveDevice
     {
         [XmlAttribute("version")]
@@ -14,6 +15,7 @@ namespace Microsoft.Crm.Services.Utility
         [XmlElement("User")]
         public DeviceUserName User { get; set; }
 
+        [SuppressMessage("Microsoft.Design", "CA1059:MembersShouldNotExposeCertainConcreteTypes", Justification = "This is required for proper XML Serialization", MessageId = "System.Xml.XmlNode")]
         [XmlElement("Token")]
         public XmlNode Token { get; set; }
 

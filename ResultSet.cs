@@ -1,10 +1,11 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [XmlRoot(ElementName = "resultset", Namespace = "")]
     [XmlType(Namespace = "")]
+    [XmlRoot(ElementName = "resultset", Namespace = "")]
     [Serializable]
     public sealed class ResultSet
     {
@@ -12,6 +13,7 @@ namespace Microsoft.Crm.Services.Utility
         private string _pagingCookie;
         private int _moreRecords;
 
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
         [XmlElement("result")]
         public Result[] Results
         {

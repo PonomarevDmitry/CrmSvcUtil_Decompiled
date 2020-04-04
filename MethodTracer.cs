@@ -32,13 +32,12 @@ namespace Microsoft.Crm.Services.Utility
 
         private static void LogMessage(string message, MethodBase method)
         {
-            CrmSvcUtil.crmSvcUtilLogger.TraceInformation(message, (object)MethodTracer.GetMethodString(method));
+            Trace.TraceInformation(message, (object)MethodTracer.GetMethodString(method));
         }
 
         private static void LogWarning(string message, MethodBase method)
         {
-            CrmSvcUtil.crmSvcUtilLogger.TraceWarning(message, (object)MethodTracer.GetMethodString(method));
-            CrmSvcUtil.crmSvcUtilLogger.Log(string.Format(message, (object)MethodTracer.GetMethodString(method)), TraceEventType.Warning);
+            Trace.TraceWarning(message, (object)MethodTracer.GetMethodString(method));
         }
 
         private static string GetMethodString(MethodBase method)

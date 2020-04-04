@@ -3,6 +3,8 @@ using Microsoft.Xrm.Sdk.Metadata;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -17,30 +19,23 @@ namespace Microsoft.Crm.Services.Utility
         {
             this._namespace = parameters.Namespace;
             this._attributeTypeMapping = new Dictionary<AttributeTypeCode, Type>();
-
             this._attributeTypeMapping.Add(AttributeTypeCode.Boolean, typeof(bool));
-
             this._attributeTypeMapping.Add(AttributeTypeCode.ManagedProperty, typeof(BooleanManagedProperty));
             this._attributeTypeMapping.Add(AttributeTypeCode.CalendarRules, typeof(object));
-
+            this._attributeTypeMapping.Add(AttributeTypeCode.Customer, typeof(EntityReference));
             this._attributeTypeMapping.Add(AttributeTypeCode.DateTime, typeof(DateTime));
-
+            this._attributeTypeMapping.Add(AttributeTypeCode.Decimal, typeof(Decimal));
             this._attributeTypeMapping.Add(AttributeTypeCode.Double, typeof(double));
             this._attributeTypeMapping.Add(AttributeTypeCode.Integer, typeof(int));
-            this._attributeTypeMapping.Add(AttributeTypeCode.BigInt, typeof(long));
-
-            this._attributeTypeMapping.Add(AttributeTypeCode.Decimal, typeof(Decimal));
-            this._attributeTypeMapping.Add(AttributeTypeCode.Money, typeof(Money));
-
             this._attributeTypeMapping.Add(AttributeTypeCode.EntityName, typeof(string));
-
-            this._attributeTypeMapping.Add(AttributeTypeCode.Customer, typeof(EntityReference));
+            this._attributeTypeMapping.Add(AttributeTypeCode.BigInt, typeof(long));
             this._attributeTypeMapping.Add(AttributeTypeCode.Lookup, typeof(EntityReference));
-            this._attributeTypeMapping.Add(AttributeTypeCode.Owner, typeof(EntityReference));
-
             this._attributeTypeMapping.Add(AttributeTypeCode.Memo, typeof(string));
+            this._attributeTypeMapping.Add(AttributeTypeCode.Money, typeof(Money));
+            this._attributeTypeMapping.Add(AttributeTypeCode.Owner, typeof(EntityReference));
+            this._attributeTypeMapping.Add(AttributeTypeCode.Picklist, typeof(OptionSetValue));
+            this._attributeTypeMapping.Add(AttributeTypeCode.Status, typeof(OptionSetValue));
             this._attributeTypeMapping.Add(AttributeTypeCode.String, typeof(string));
-
             this._attributeTypeMapping.Add(AttributeTypeCode.Uniqueidentifier, typeof(Guid));
         }
 
@@ -76,7 +71,6 @@ namespace Microsoft.Crm.Services.Utility
                 {
                     if (key == AttributeTypeCode.PartyList)
                         return this.BuildCodeTypeReferenceForPartyList(services);
-
                     if (attributeMetadata is ImageAttributeMetadata)
                     {
                         type = typeof(byte[]);
@@ -85,17 +79,7 @@ namespace Microsoft.Crm.Services.Utility
                     {
                         OptionSetMetadataBase attributeOptionSet = TypeMappingService.GetAttributeOptionSet(attributeMetadata);
                         if (attributeOptionSet != null)
-                        {
-                            CodeTypeReference codeTypeReference = this.BuildCodeTypeReferenceForOptionSet(attributeMetadata.LogicalName, entityMetadata, attributeOptionSet, services);
-                            if (!codeTypeReference.BaseType.Equals("System.Object"))
-                                return codeTypeReference;
-                            if (key.Equals((object)AttributeTypeCode.Picklist) || key.Equals((object)AttributeTypeCode.Status))
-                            {
-                                type = typeof(OptionSetValue);
-                                if (type.IsValueType)
-                                    type = typeof(Nullable<>).MakeGenericType(type);
-                            }
-                        }
+                            return this.BuildCodeTypeReferenceForOptionSet(attributeMetadata.LogicalName, entityMetadata, attributeOptionSet, services);
                     }
                 }
                 if (type.IsValueType)
@@ -135,7 +119,9 @@ namespace Microsoft.Crm.Services.Utility
             ICodeWriterFilterService service1 = (ICodeWriterFilterService)services.GetService(typeof(ICodeWriterFilterService));
             INamingService service2 = (INamingService)services.GetService(typeof(INamingService));
             ICodeGenerationService service3 = (ICodeGenerationService)services.GetService(typeof(ICodeGenerationService));
-            if (service1.GenerateOptionSet(attributeOptionSet, services))
+            OptionSetMetadataBase optionSetMetadata = attributeOptionSet;
+            IServiceProvider services1 = services;
+            if (service1.GenerateOptionSet(optionSetMetadata, services1))
             {
                 string nameForOptionSet = service2.GetNameForOptionSet(entityMetadata, attributeOptionSet, services);
                 CodeGenerationType typeForOptionSet = service3.GetTypeForOptionSet(entityMetadata, attributeOptionSet, services);
@@ -147,29 +133,28 @@ namespace Microsoft.Crm.Services.Utility
                     case CodeGenerationType.Struct:
                         return TypeMappingService.TypeRef(typeof(Nullable<>), this.TypeRef(nameForOptionSet));
                     default:
-                        CrmSvcUtil.crmSvcUtilLogger.TraceWarning("Cannot map type for atttribute {0} with OptionSet type {1} which has CodeGenerationType {2}", (object)attributeName, (object)attributeOptionSet.Name, (object)typeForOptionSet);
+                        Trace.TraceWarning("Cannot map type for atttribute {0} with OptionSet type {1} which has CodeGenerationType {2}", (object)attributeName, (object)attributeOptionSet.Name, (object)typeForOptionSet);
                         break;
                 }
             }
             return TypeMappingService.TypeRef(typeof(object));
         }
 
-        private CodeTypeReference BuildCodeTypeReferenceForPartyList(IServiceProvider services)
+        private CodeTypeReference BuildCodeTypeReferenceForPartyList(
+          IServiceProvider services)
         {
+            IMetadataProviderService service1 = (IMetadataProviderService)services.GetService(typeof(IMetadataProviderService));
             ICodeWriterFilterService filterService = (ICodeWriterFilterService)services.GetService(typeof(ICodeWriterFilterService));
-            INamingService service = (INamingService)services.GetService(typeof(INamingService));
-
-            EntityMetadata entityMetadata = ((IEnumerable<EntityMetadata>)((IMetadataProviderService)services.GetService(typeof(IMetadataProviderService))).LoadMetadata().Entities).FirstOrDefault<EntityMetadata>((Func<EntityMetadata, bool>)(entity =>
-            {
-                if (string.Equals(entity.LogicalName, "activityparty", StringComparison.Ordinal))
-                    return filterService.GenerateEntity(entity, services);
-                return false;
-            }));
-
+            INamingService service2 = (INamingService)services.GetService(typeof(INamingService));
+            EntityMetadata entityMetadata = ((IEnumerable<EntityMetadata>)service1.LoadMetadata().Entities).FirstOrDefault<EntityMetadata>((Func<EntityMetadata, bool>)(entity =>
+          {
+              if (string.Equals(entity.LogicalName, "activityparty", StringComparison.Ordinal))
+                  return filterService.GenerateEntity(entity, services);
+              return false;
+          }));
             if (entityMetadata == null)
                 return TypeMappingService.TypeRef(typeof(IEnumerable<>), TypeMappingService.TypeRef(typeof(Entity)));
-
-            return TypeMappingService.TypeRef(typeof(IEnumerable<>), this.TypeRef(service.GetNameForEntity(entityMetadata, services)));
+            return TypeMappingService.TypeRef(typeof(IEnumerable<>), this.TypeRef(service2.GetNameForEntity(entityMetadata, services)));
         }
 
         internal static OptionSetMetadataBase GetAttributeOptionSet(
@@ -188,13 +173,12 @@ namespace Microsoft.Crm.Services.Utility
             return optionSetMetadataBase;
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private CodeTypeReference GetTypeForField(string clrFormatter, bool isGeneric)
         {
             CodeTypeReference codeTypeReference = TypeMappingService.TypeRef(typeof(object));
-
             if (isGeneric)
                 codeTypeReference = new CodeTypeReference(new CodeTypeParameter("T"));
-
             else if (!string.IsNullOrEmpty(clrFormatter))
             {
                 Type type = Type.GetType(clrFormatter, false);
@@ -204,9 +188,11 @@ namespace Microsoft.Crm.Services.Utility
                 }
                 else
                 {
-                    string[] strArray = clrFormatter.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (strArray != null && strArray.Length > 0)
+                    string[] strArray = clrFormatter.Split(new char[1]
+                    {
+            ','
+                    }, StringSplitOptions.RemoveEmptyEntries);
+                    if (strArray != null && strArray.Length != 0)
                         codeTypeReference = new CodeTypeReference(strArray[0]);
                 }
             }
@@ -215,10 +201,9 @@ namespace Microsoft.Crm.Services.Utility
 
         private CodeTypeReference TypeRef(string typeName)
         {
-            if (!string.IsNullOrWhiteSpace(this.Namespace))
-                return new CodeTypeReference(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "{0}.{1}", (object)this.Namespace, (object)typeName));
-
-            return new CodeTypeReference(typeName);
+            if (string.IsNullOrWhiteSpace(this.Namespace))
+                return new CodeTypeReference(typeName);
+            return new CodeTypeReference(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "{0}.{1}", (object)this.Namespace, (object)typeName));
         }
 
         private static CodeTypeReference TypeRef(Type type)
@@ -232,7 +217,7 @@ namespace Microsoft.Crm.Services.Utility
         {
             return new CodeTypeReference(type.FullName, new CodeTypeReference[1]
             {
-                typeParameter
+        typeParameter
             });
         }
     }

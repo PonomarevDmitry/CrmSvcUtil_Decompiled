@@ -54,12 +54,23 @@ namespace Microsoft.Crm.Services.Utility
         {
             if (!result.SdkMessageRequestFieldPosition.HasValue)
                 return;
-            if (!this.RequestFields.ContainsKey(result.SdkMessageRequestFieldPosition.Value))
+            Dictionary<int, SdkMessageRequestField> requestFields1 = this.RequestFields;
+            int? requestFieldPosition = result.SdkMessageRequestFieldPosition;
+            int key1 = requestFieldPosition.Value;
+            if (!requestFields1.ContainsKey(key1))
             {
-                SdkMessageRequestField messageRequestField = new SdkMessageRequestField(this, result.SdkMessageRequestFieldPosition.Value, result.SdkMessageRequestFieldName, result.SdkMessageRequestFieldClrParser, result.SdkMessageRequestFieldIsOptional);
-                this.RequestFields.Add(result.SdkMessageRequestFieldPosition.Value, messageRequestField);
+                requestFieldPosition = result.SdkMessageRequestFieldPosition;
+                SdkMessageRequestField messageRequestField1 = new SdkMessageRequestField(this, requestFieldPosition.Value, result.SdkMessageRequestFieldName, result.SdkMessageRequestFieldClrParser, result.SdkMessageRequestFieldIsOptional);
+                Dictionary<int, SdkMessageRequestField> requestFields2 = this.RequestFields;
+                requestFieldPosition = result.SdkMessageRequestFieldPosition;
+                int key2 = requestFieldPosition.Value;
+                SdkMessageRequestField messageRequestField2 = messageRequestField1;
+                requestFields2.Add(key2, messageRequestField2);
             }
-            SdkMessageRequestField requestField = this.RequestFields[result.SdkMessageRequestFieldPosition.Value];
+            Dictionary<int, SdkMessageRequestField> requestFields3 = this.RequestFields;
+            requestFieldPosition = result.SdkMessageRequestFieldPosition;
+            int index = requestFieldPosition.Value;
+            SdkMessageRequestField messageRequestField = requestFields3[index];
         }
     }
 }

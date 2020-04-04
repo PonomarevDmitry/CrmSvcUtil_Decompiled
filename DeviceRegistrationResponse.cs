@@ -3,8 +3,8 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [XmlRoot("DeviceAddResponse")]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [XmlRoot("DeviceAddResponse")]
     public sealed class DeviceRegistrationResponse
     {
         [XmlElement("success")]

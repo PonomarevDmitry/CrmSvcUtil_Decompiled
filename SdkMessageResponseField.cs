@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Microsoft.Crm.Services.Utility
 {
     public sealed class SdkMessageResponseField
@@ -31,6 +33,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "CLR")]
         public string CLRFormatter
         {
             get

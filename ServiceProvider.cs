@@ -28,14 +28,6 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        internal IMetadataProviderQueryService MetadataProviderQueryServcie
-        {
-            get
-            {
-                return (IMetadataProviderQueryService)this._services[typeof(IMetadataProviderQueryService)];
-            }
-        }
-
         internal ICustomizeCodeDomService CodeCustomizationService
         {
             get
@@ -89,7 +81,6 @@ namespace Microsoft.Crm.Services.Utility
             this._services.Add(typeof(ICodeWriterFilterService), (object)ServiceFactory.CreateInstance<ICodeWriterFilterService>((ICodeWriterFilterService)writerFilterService, parameters.CodeWriterFilterService, parameters));
             this._services.Add(typeof(ICodeWriterMessageFilterService), (object)ServiceFactory.CreateInstance<ICodeWriterMessageFilterService>((ICodeWriterMessageFilterService)writerFilterService, parameters.CodeWriterMessageFilterService, parameters));
             this._services.Add(typeof(IMetadataProviderService), (object)ServiceFactory.CreateInstance<IMetadataProviderService>((IMetadataProviderService)new SdkMetadataProviderService(parameters), parameters.MetadataProviderService, parameters));
-            this._services.Add(typeof(IMetadataProviderQueryService), (object)ServiceFactory.CreateInstance<IMetadataProviderQueryService>((IMetadataProviderQueryService)new MetadataProviderQueryService(parameters), parameters.MetadataQueryProvider, parameters));
             this._services.Add(typeof(ICodeGenerationService), (object)ServiceFactory.CreateInstance<ICodeGenerationService>((ICodeGenerationService)new Microsoft.Crm.Services.Utility.CodeGenerationService(), parameters.CodeGenerationService, parameters));
             this._services.Add(typeof(INamingService), (object)ServiceFactory.CreateInstance<INamingService>((INamingService)new Microsoft.Crm.Services.Utility.NamingService(parameters), parameters.NamingService, parameters));
             this._services.Add(typeof(ICustomizeCodeDomService), (object)ServiceFactory.CreateInstance<ICustomizeCodeDomService>((ICustomizeCodeDomService)new CodeDomCustomizationService(), parameters.CodeCustomizationService, parameters));

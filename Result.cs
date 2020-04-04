@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
@@ -291,6 +292,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OTC")]
         [XmlElement("sdmessagefilter.primaryobjecttypecode", Form = XmlSchemaForm.Unqualified)]
         public int SdkMessagePrimaryOTCFilter
         {
@@ -304,6 +306,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OTC")]
         [XmlElement("sdmessagefilter.secondaryobjecttypecode", Form = XmlSchemaForm.Unqualified)]
         public int SdkMessageSecondaryOTCFilter
         {

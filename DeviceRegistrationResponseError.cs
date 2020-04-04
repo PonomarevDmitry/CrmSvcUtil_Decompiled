@@ -5,8 +5,8 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [XmlRoot("Error")]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [XmlRoot("Error")]
     public sealed class DeviceRegistrationResponseError
     {
         private string _code;

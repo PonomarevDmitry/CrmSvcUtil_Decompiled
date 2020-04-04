@@ -1,6 +1,7 @@
 using Microsoft.Xrm.Sdk.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Crm.Services.Utility
 {
@@ -12,6 +13,7 @@ namespace Microsoft.Crm.Services.Utility
         private bool _generateCustomActions;
         private bool _generateServiceContext;
 
+        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static CodeWriterFilterService()
         {
             CodeWriterFilterService._excludedNamespaces.Add("http://schemas.microsoft.com/xrm/2011/contracts");
@@ -47,15 +49,30 @@ namespace Microsoft.Crm.Services.Utility
                 return false;
             if (entityMetadata.IsIntersect.GetValueOrDefault() || string.Equals(entityMetadata.LogicalName, "activityparty", StringComparison.Ordinal) || string.Equals(entityMetadata.LogicalName, "calendarrule", StringComparison.Ordinal))
                 return true;
-            IMetadataProviderService service = (IMetadataProviderService)services.GetService(typeof(IMetadataProviderService));
-            foreach (SdkMessage sdkMessage in (!(service is IMetadataProviderService2) ? service.LoadMetadata() : ((IMetadataProviderService2)service).LoadMetadata(services)).Messages.MessageCollection.Values)
+            foreach (SdkMessage sdkMessage in ((IMetadataProviderService)services.GetService(typeof(IMetadataProviderService))).LoadMetadata().Messages.MessageCollection.Values)
             {
                 if (!sdkMessage.IsPrivate)
                 {
                     foreach (SdkMessageFilter sdkMessageFilter in sdkMessage.SdkMessageFilters.Values)
                     {
-                        if (entityMetadata.ObjectTypeCode.HasValue && sdkMessageFilter.PrimaryObjectTypeCode == entityMetadata.ObjectTypeCode.Value || entityMetadata.ObjectTypeCode.HasValue && sdkMessageFilter.SecondaryObjectTypeCode == entityMetadata.ObjectTypeCode.Value)
-                            return true;
+                        int? objectTypeCode = entityMetadata.ObjectTypeCode;
+                        if (objectTypeCode.HasValue)
+                        {
+                            int primaryObjectTypeCode = sdkMessageFilter.PrimaryObjectTypeCode;
+                            objectTypeCode = entityMetadata.ObjectTypeCode;
+                            int num = objectTypeCode.Value;
+                            if (primaryObjectTypeCode == num)
+                                return true;
+                        }
+                        objectTypeCode = entityMetadata.ObjectTypeCode;
+                        if (objectTypeCode.HasValue)
+                        {
+                            int secondaryObjectTypeCode = sdkMessageFilter.SecondaryObjectTypeCode;
+                            objectTypeCode = entityMetadata.ObjectTypeCode;
+                            int num = objectTypeCode.Value;
+                            if (secondaryObjectTypeCode == num)
+                                return true;
+                        }
                     }
                 }
             }
@@ -66,9 +83,23 @@ namespace Microsoft.Crm.Services.Utility
           AttributeMetadata attributeMetadata,
           IServiceProvider services)
         {
-            return !this.IsNotExposedChildAttribute(attributeMetadata) && (attributeMetadata.IsValidForCreate.GetValueOrDefault() || attributeMetadata.IsValidForRead.GetValueOrDefault() || attributeMetadata.IsValidForUpdate.GetValueOrDefault());
+            if (this.IsNotExposedChildAttribute(attributeMetadata))
+                return false;
+            bool? nullable = attributeMetadata.IsValidForCreate;
+            if (!nullable.GetValueOrDefault())
+            {
+                nullable = attributeMetadata.IsValidForRead;
+                if (!nullable.GetValueOrDefault())
+                {
+                    nullable = attributeMetadata.IsValidForUpdate;
+                    if (!nullable.GetValueOrDefault())
+                        return false;
+                }
+            }
+            return true;
         }
 
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private bool IsNotExposedChildAttribute(AttributeMetadata attributeMetadata)
         {
             if (!string.IsNullOrEmpty(attributeMetadata.AttributeOf) && !(attributeMetadata is ImageAttributeMetadata) && !attributeMetadata.LogicalName.EndsWith("_url", StringComparison.OrdinalIgnoreCase))

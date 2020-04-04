@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Crm.Services.Utility
 {
@@ -49,6 +50,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "CLR")]
         public string CLRFormatter
         {
             get
@@ -69,7 +71,7 @@ namespace Microsoft.Crm.Services.Utility
         {
             get
             {
-                if (string.Equals(this.CLRFormatter, EntityTypeName, StringComparison.Ordinal))
+                if (string.Equals(this.CLRFormatter, "Microsoft.Xrm.Sdk.Entity,Microsoft.Xrm.Sdk", StringComparison.Ordinal))
                     return this.Request.MessagePair.Message.SdkMessageFilters.Count > 1;
                 return false;
             }

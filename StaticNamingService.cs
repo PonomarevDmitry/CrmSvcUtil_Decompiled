@@ -9,23 +9,20 @@ namespace Microsoft.Crm.Services.Utility
 
         public static string GetNameForEntity(EntityMetadata entityMetadata)
         {
-            switch (entityMetadata.LogicalName)
-            {
-                case "activitymimeattachment":
-                    return "ActivityMimeAttachment";
-                case "monthlyfiscalcalendar":
-                    return "MonthlyFiscalCalendar";
-                case "fixedmonthlyfiscalcalendar":
-                    return "FixedMonthlyFiscalCalendar";
-                case "quarterlyfiscalcalendar":
-                    return "QuarterlyFiscalCalendar";
-                case "semiannualfiscalcalendar":
-                    return "SemiAnnualFiscalCalendar";
-                case "annualfiscalcalendar":
-                    return "AnnualFiscalCalendar";
-                default:
-                    return string.Empty;
-            }
+            string logicalName = entityMetadata.LogicalName;
+            if (logicalName == "activitymimeattachment")
+                return "ActivityMimeAttachment";
+            if (logicalName == "monthlyfiscalcalendar")
+                return "MonthlyFiscalCalendar";
+            if (logicalName == "fixedmonthlyfiscalcalendar")
+                return "FixedMonthlyFiscalCalendar";
+            if (logicalName == "quarterlyfiscalcalendar")
+                return "QuarterlyFiscalCalendar";
+            if (logicalName == "semiannualfiscalcalendar")
+                return "SemiAnnualFiscalCalendar";
+            if (logicalName == "annualfiscalcalendar")
+                return "AnnualFiscalCalendar";
+            return string.Empty;
         }
 
         public static string GetNameForAttribute(AttributeMetadata attributeMetadata)

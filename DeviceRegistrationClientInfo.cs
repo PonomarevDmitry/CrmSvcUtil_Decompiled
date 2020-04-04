@@ -4,8 +4,8 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [XmlRoot("ClientInfo")]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [XmlRoot("ClientInfo")]
     public sealed class DeviceRegistrationClientInfo
     {
         [XmlAttribute("name")]

@@ -7,10 +7,10 @@ namespace Microsoft.Crm.Services.Utility
 {
     public sealed class SdkMessages
     {
-        private readonly Dictionary<Guid, SdkMessage> _messages;
+        private Dictionary<Guid, SdkMessage> _messages;
 
         private SdkMessages()
-          : this(null)
+          : this((Dictionary<Guid, SdkMessage>)null)
         {
         }
 
@@ -19,15 +19,18 @@ namespace Microsoft.Crm.Services.Utility
             this._messages = messageCollection ?? new Dictionary<Guid, SdkMessage>();
         }
 
-        public Dictionary<Guid, SdkMessage> MessageCollection => this._messages;
+        public Dictionary<Guid, SdkMessage> MessageCollection
+        {
+            get
+            {
+                return this._messages;
+            }
+        }
 
         private void Fill(ResultSet resultSet)
         {
             if (resultSet.Results == null)
-            {
                 return;
-            }
-
             foreach (Result result in resultSet.Results)
             {
                 if (result.SdkMessageId != Guid.Empty && !this.MessageCollection.ContainsKey(result.SdkMessageId))
@@ -39,16 +42,13 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        public static MessagePagingInfo FromFetchResult(
+        internal static MessagePagingInfo FromFetchResult(
           SdkMessages messages,
           string xml)
         {
-            ResultSet resultSet = null;
+            ResultSet resultSet = (ResultSet)null;
             using (StringReader stringReader = new StringReader(xml))
-            {
-                resultSet = new XmlSerializer(typeof(ResultSet), string.Empty).Deserialize(stringReader) as ResultSet;
-            }
-
+                resultSet = new XmlSerializer(typeof(ResultSet), string.Empty).Deserialize((TextReader)stringReader) as ResultSet;
             messages.Fill(resultSet);
             return MessagePagingInfo.FromResultSet(resultSet);
         }

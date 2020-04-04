@@ -22,7 +22,7 @@ namespace Microsoft.Crm.Services.Utility
             this._id = id;
             this._isPrivate = isPrivate;
             this._name = name;
-            this._isCustomAction = customizationLevel != (byte)0;
+            this._isCustomAction = customizationLevel > (byte)0;
             this._sdkMessagePairs = new Dictionary<Guid, SdkMessagePair>();
             this._sdkMessageFilters = new Dictionary<Guid, SdkMessageFilter>();
         }

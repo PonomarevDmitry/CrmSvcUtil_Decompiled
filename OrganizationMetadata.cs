@@ -1,4 +1,5 @@
 using Microsoft.Xrm.Sdk.Metadata;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.Crm.Services.Utility
@@ -14,11 +15,11 @@ namespace Microsoft.Crm.Services.Utility
           OptionSetMetadataBase[] optionSets,
           SdkMessages messages)
         {
-            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             this._entities = entities;
             this._optionSets = optionSets;
             this._sdkMessages = messages;
-            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         EntityMetadata[] IOrganizationMetadata.Entities
