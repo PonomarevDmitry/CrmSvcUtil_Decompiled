@@ -5,6 +5,7 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>SDK Messages</summary>
     public sealed class SdkMessages
     {
         private Dictionary<Guid, SdkMessage> _messages;
@@ -14,11 +15,14 @@ namespace Microsoft.Crm.Services.Utility
         {
         }
 
+        /// <summary>Constructor</summary>
+        /// <param name="messageCollection">SDK message collection</param>
         public SdkMessages(Dictionary<Guid, SdkMessage> messageCollection)
         {
             this._messages = messageCollection ?? new Dictionary<Guid, SdkMessage>();
         }
 
+        /// <summary>Gets the message collection</summary>
         public Dictionary<Guid, SdkMessage> MessageCollection
         {
             get
@@ -42,7 +46,10 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        internal static MessagePagingInfo FromFetchResult(
+        /// <summary>
+        /// Gets the MessagePagingInfo for a given collection SDK messages
+        /// </summary>
+        public static MessagePagingInfo FromFetchResult(
           SdkMessages messages,
           string xml)
         {

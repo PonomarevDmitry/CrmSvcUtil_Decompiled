@@ -1,7 +1,6 @@
 using Microsoft.Xrm.Sdk.Metadata;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Crm.Services.Utility
 {
@@ -13,7 +12,6 @@ namespace Microsoft.Crm.Services.Utility
         private bool _generateCustomActions;
         private bool _generateServiceContext;
 
-        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static CodeWriterFilterService()
         {
             CodeWriterFilterService._excludedNamespaces.Add("http://schemas.microsoft.com/xrm/2011/contracts");
@@ -49,7 +47,8 @@ namespace Microsoft.Crm.Services.Utility
                 return false;
             if (entityMetadata.IsIntersect.GetValueOrDefault() || string.Equals(entityMetadata.LogicalName, "activityparty", StringComparison.Ordinal) || string.Equals(entityMetadata.LogicalName, "calendarrule", StringComparison.Ordinal))
                 return true;
-            foreach (SdkMessage sdkMessage in ((IMetadataProviderService)services.GetService(typeof(IMetadataProviderService))).LoadMetadata().Messages.MessageCollection.Values)
+            IMetadataProviderService service = (IMetadataProviderService)services.GetService(typeof(IMetadataProviderService));
+            foreach (SdkMessage sdkMessage in (!(service is IMetadataProviderService2) ? service.LoadMetadata() : ((IMetadataProviderService2)service).LoadMetadata(services)).Messages.MessageCollection.Values)
             {
                 if (!sdkMessage.IsPrivate)
                 {
@@ -99,7 +98,9 @@ namespace Microsoft.Crm.Services.Utility
             return true;
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        /// <summary>
+        /// If true a child attribute cannot be published or externally consumed.
+        /// </summary>
         private bool IsNotExposedChildAttribute(AttributeMetadata attributeMetadata)
         {
             if (!string.IsNullOrEmpty(attributeMetadata.AttributeOf) && !(attributeMetadata is ImageAttributeMetadata) && !attributeMetadata.LogicalName.EndsWith("_url", StringComparison.OrdinalIgnoreCase))

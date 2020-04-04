@@ -1,9 +1,9 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Set of SDK message results</summary>
     [XmlType(Namespace = "")]
     [XmlRoot(ElementName = "resultset", Namespace = "")]
     [Serializable]
@@ -13,7 +13,7 @@ namespace Microsoft.Crm.Services.Utility
         private string _pagingCookie;
         private int _moreRecords;
 
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+        /// <summary>Gets or sets an array of results</summary>
         [XmlElement("result")]
         public Result[] Results
         {
@@ -27,6 +27,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the paging cookie</summary>
         [XmlAttribute("paging-cookie")]
         public string PagingCookie
         {
@@ -40,6 +41,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets a flag for more records</summary>
         [XmlAttribute("morerecords")]
         public int MoreRecords
         {

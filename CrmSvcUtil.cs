@@ -10,9 +10,11 @@ namespace Microsoft.Crm.Services.Utility
 {
     internal sealed class CrmSvcUtil
     {
+        internal static TraceLogger crmSvcUtilLogger = new TraceLogger(nameof(CrmSvcUtil));
         internal static readonly Guid ApplicationId = new Guid("321f8931-15b2-4d9b-b894-b18f91ba6a5a");
         private CrmSvcUtilParameters _parameters;
         private ServiceProvider _serviceProvider;
+        private IOrganizationMetadata organizationMetadata;
 
         private CrmSvcUtil()
         {
@@ -84,13 +86,13 @@ namespace Microsoft.Crm.Services.Utility
             MethodTracer.Enter();
             if (!this.Parameters.NoLogo)
                 CrmSvcUtil.ShowLogo();
-            IOrganizationMetadata organizationMetadata = this.ServiceProvider.MetadataProviderService.LoadMetadata();
-            if (organizationMetadata == null)
+            this.organizationMetadata = !(this.ServiceProvider.MetadataProviderService is IMetadataProviderService2) ? this.ServiceProvider.MetadataProviderService.LoadMetadata() : ((IMetadataProviderService2)this.ServiceProvider.MetadataProviderService).LoadMetadata((IServiceProvider)this.ServiceProvider);
+            if (this.organizationMetadata == null)
             {
-                Trace.TraceError("{0} returned null metadata", (object)typeof(IMetadataProviderService).Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceError("{0} returned null metadata", (object)typeof(IMetadataProviderService).Name);
                 return 1;
             }
-            this.WriteCode(organizationMetadata);
+            this.WriteCode(this.organizationMetadata);
             MethodTracer.LogMessage("Exiting {0} with exit code 0");
             return 0;
         }
@@ -119,6 +121,7 @@ namespace Microsoft.Crm.Services.Utility
             MethodTracer.Exit();
         }
 
+        [STAThread]
         private static int Main(string[] args)
         {
             CrmSvcUtil crmSvcUtil = (CrmSvcUtil)null;
@@ -152,24 +155,33 @@ namespace Microsoft.Crm.Services.Utility
             {
                 Console.Error.WriteLine();
                 Console.Error.WriteLine("Exiting program with exception: {0}", (object)ex.Detail.Message);
-                Console.Error.WriteLine("Enable tracing and view the trace files for more information.");
-                Trace.TraceError("Exiting program with exit code 2 due to exception : {0}", (object)ex.Detail);
+                if (CrmSvcUtil.crmSvcUtilLogger.CurrentTraceLevel == SourceLevels.Off)
+                    Console.Error.WriteLine("Enable tracing and view the trace files for more information.");
+                CrmSvcUtil.crmSvcUtilLogger.TraceError("Exiting program with exit code 2 due to exception : {0}", (object)ex.Detail);
+                CrmSvcUtil.crmSvcUtilLogger.Log("===== DETAIL ======", TraceEventType.Error);
+                CrmSvcUtil.crmSvcUtilLogger.Log((Exception)ex);
                 return 2;
             }
             catch (MessageSecurityException ex)
             {
                 Console.Error.WriteLine();
                 Console.Error.WriteLine("Exiting program with exception: {0}", (object)ex.InnerException.Message);
-                Console.Error.WriteLine("Enable tracing and view the trace files for more information.");
-                Trace.TraceError("Exiting program with exit code 2 due to exception : {0}", (object)ex.InnerException);
+                if (CrmSvcUtil.crmSvcUtilLogger.CurrentTraceLevel == SourceLevels.Off)
+                    Console.Error.WriteLine("Enable tracing and view the trace files for more information.");
+                CrmSvcUtil.crmSvcUtilLogger.TraceError("Exiting program with exit code 2 due to exception : {0}", (object)ex.InnerException);
+                CrmSvcUtil.crmSvcUtilLogger.Log("===== DETAIL ======", TraceEventType.Error);
+                CrmSvcUtil.crmSvcUtilLogger.Log((Exception)ex);
                 return 2;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine();
                 Console.Error.WriteLine("Exiting program with exception: {0}", (object)ex.Message);
-                Console.Error.WriteLine("Enable tracing and view the trace files for more information.");
-                Trace.TraceError("Exiting program with exit code 2 due to exception : {0}", (object)ex);
+                if (CrmSvcUtil.crmSvcUtilLogger.CurrentTraceLevel == SourceLevels.Off)
+                    Console.Error.WriteLine("Enable tracing and view the trace files for more information.");
+                CrmSvcUtil.crmSvcUtilLogger.TraceError("Exiting program with exit code 2 due to exception : {0}", (object)ex);
+                CrmSvcUtil.crmSvcUtilLogger.Log("===== DETAIL ======", TraceEventType.Error);
+                CrmSvcUtil.crmSvcUtilLogger.Log(ex);
                 return 2;
             }
         }

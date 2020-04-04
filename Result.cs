@@ -1,10 +1,10 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>SDK Message result</summary>
     [XmlType]
     [Serializable]
     public sealed class Result
@@ -32,6 +32,7 @@ namespace Microsoft.Crm.Services.Utility
         private int _sdkMessageFilterPrimaryOTCField;
         private int _sdkMessageFilterSecondaryOTCField;
 
+        /// <summary>Message name</summary>
         [XmlElement(ElementName = "name", Form = XmlSchemaForm.Unqualified)]
         public string Name
         {
@@ -45,6 +46,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets whether the message is private</summary>
         [XmlElement(ElementName = "isprivate", Form = XmlSchemaForm.Unqualified)]
         public bool IsPrivate
         {
@@ -58,6 +60,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the customization level</summary>
         [XmlElement(ElementName = "customizationlevel", Form = XmlSchemaForm.Unqualified)]
         public byte CustomizationLevel
         {
@@ -71,6 +74,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message id</summary>
         [XmlElement(ElementName = "sdkmessageid", Form = XmlSchemaForm.Unqualified)]
         public Guid SdkMessageId
         {
@@ -84,6 +88,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message pair id</summary>
         [XmlElement("sdkmessagepair.sdkmessagepairid", Form = XmlSchemaForm.Unqualified)]
         public Guid SdkMessagePairId
         {
@@ -97,6 +102,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message pair namespace</summary>
         [XmlElement("sdkmessagepair.namespace", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessagePairNamespace
         {
@@ -110,6 +116,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request id</summary>
         [XmlElement("sdkmessagerequest.sdkmessagerequestid", Form = XmlSchemaForm.Unqualified)]
         public Guid SdkMessageRequestId
         {
@@ -123,6 +130,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request name</summary>
         [XmlElement("sdkmessagerequest.name", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageRequestName
         {
@@ -136,6 +144,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request field name</summary>
         [XmlElement("sdkmessagerequestfield.name", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageRequestFieldName
         {
@@ -149,6 +158,9 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether the message request field is optional
+        /// </summary>
         [XmlElement("sdkmessagerequestfield.optional", Form = XmlSchemaForm.Unqualified)]
         public bool SdkMessageRequestFieldIsOptional
         {
@@ -162,6 +174,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request field parser</summary>
         [XmlElement("sdkmessagerequestfield.parser", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageRequestFieldParser
         {
@@ -175,6 +188,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request field CLR parser</summary>
         [XmlElement("sdkmessagerequestfield.clrparser", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageRequestFieldClrParser
         {
@@ -188,6 +202,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request response id</summary>
         [XmlElement("sdkmessageresponse.sdkmessageresponseid", Form = XmlSchemaForm.Unqualified)]
         public Guid SdkMessageResponseId
         {
@@ -201,6 +216,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request response field value</summary>
         [XmlElement("sdkmessageresponsefield.value", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageResponseFieldValue
         {
@@ -214,6 +230,9 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>
+        /// Gets or sets the message request response field formatter
+        /// </summary>
         [XmlElement("sdkmessageresponsefield.formatter", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageResponseFieldFormatter
         {
@@ -227,6 +246,9 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>
+        /// Gets or sets the message request response field CLR formatter
+        /// </summary>
         [XmlElement("sdkmessageresponsefield.clrformatter", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageResponseFieldClrFormatter
         {
@@ -240,6 +262,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request response field name</summary>
         [XmlElement("sdkmessageresponsefield.name", Form = XmlSchemaForm.Unqualified)]
         public string SdkMessageResponseFieldName
         {
@@ -253,6 +276,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request field position</summary>
         [XmlElement("sdkmessagerequestfield.position", Form = XmlSchemaForm.Unqualified, IsNullable = true)]
         public int? SdkMessageRequestFieldPosition
         {
@@ -266,6 +290,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message response field position</summary>
         [XmlElement("sdkmessageresponsefield.position", Form = XmlSchemaForm.Unqualified, IsNullable = true)]
         public int? SdkMessageResponseFieldPosition
         {
@@ -279,6 +304,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message filter id</summary>
         [XmlElement("sdmessagefilter.sdkmessagefilterid", Form = XmlSchemaForm.Unqualified)]
         public Guid SdkMessageFilterId
         {
@@ -292,7 +318,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OTC")]
+        /// <summary>Gets or sets the message primary OTC filter</summary>
         [XmlElement("sdmessagefilter.primaryobjecttypecode", Form = XmlSchemaForm.Unqualified)]
         public int SdkMessagePrimaryOTCFilter
         {
@@ -306,7 +332,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "OTC")]
+        /// <summary>Gets or sets the message secondary OTC filter</summary>
         [XmlElement("sdmessagefilter.secondaryobjecttypecode", Form = XmlSchemaForm.Unqualified)]
         public int SdkMessageSecondaryOTCFilter
         {

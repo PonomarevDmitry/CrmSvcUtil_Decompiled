@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>An SDK Message</summary>
     public sealed class SdkMessage
     {
         private string _name;
@@ -12,6 +13,7 @@ namespace Microsoft.Crm.Services.Utility
         private Dictionary<Guid, SdkMessagePair> _sdkMessagePairs;
         private Dictionary<Guid, SdkMessageFilter> _sdkMessageFilters;
 
+        /// <summary>Default constructor</summary>
         public SdkMessage(Guid id, string name, bool isPrivate)
           : this(id, name, isPrivate, (byte)0)
         {
@@ -27,6 +29,7 @@ namespace Microsoft.Crm.Services.Utility
             this._sdkMessageFilters = new Dictionary<Guid, SdkMessageFilter>();
         }
 
+        /// <summary>Gets the SDK message name</summary>
         public string Name
         {
             get
@@ -35,6 +38,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the SDK message id</summary>
         public Guid Id
         {
             get
@@ -43,6 +47,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets whether the SDK message is private</summary>
         public bool IsPrivate
         {
             get
@@ -51,6 +56,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets whether the SDK message is a custom action</summary>
         public bool IsCustomAction
         {
             get
@@ -59,6 +65,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets a dictionary of message pairs</summary>
         public Dictionary<Guid, SdkMessagePair> SdkMessagePairs
         {
             get
@@ -67,6 +74,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets a dictionary of message filters</summary>
         public Dictionary<Guid, SdkMessageFilter> SdkMessageFilters
         {
             get
@@ -75,6 +83,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Fills an SDK message from a given result</summary>
         internal void Fill(Result result)
         {
             if (!this.SdkMessagePairs.ContainsKey(result.SdkMessagePairId))

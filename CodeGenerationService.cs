@@ -7,8 +7,6 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -17,7 +15,6 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "The extra coupling is temporary.")]
     internal sealed class CodeGenerationService : ICodeGenerationService
     {
         private static Type AttributeLogicalNameAttribute = typeof(Microsoft.Xrm.Sdk.AttributeLogicalNameAttribute);
@@ -41,11 +38,11 @@ namespace Microsoft.Crm.Services.Utility
           string outputNamespace,
           IServiceProvider services)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             ServiceProvider serviceProvider = services as ServiceProvider;
             CodeNamespace codenamespace = CodeGenerationService.BuildCodeDom(organizationMetadata, outputNamespace, serviceProvider);
             CodeGenerationService.WriteFile(outputFile, language, codenamespace, serviceProvider);
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         CodeGenerationType ICodeGenerationService.GetTypeForOptionSet(
@@ -107,13 +104,13 @@ namespace Microsoft.Crm.Services.Utility
           string outputNamespace,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeNamespace codeNamespace = CodeGenerationService.Namespace(outputNamespace);
             codeNamespace.Types.AddRange(CodeGenerationService.BuildOptionSets(organizationMetadata.OptionSets, serviceProvider));
             codeNamespace.Types.AddRange(CodeGenerationService.BuildEntities(organizationMetadata.Entities, serviceProvider));
             codeNamespace.Types.AddRange(CodeGenerationService.BuildServiceContext(organizationMetadata.Entities, serviceProvider));
             codeNamespace.Types.AddRange(CodeGenerationService.BuildMessages(organizationMetadata.Messages, serviceProvider));
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
             return codeNamespace;
         }
 
@@ -123,7 +120,7 @@ namespace Microsoft.Crm.Services.Utility
           CodeNamespace codenamespace,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeCompileUnit codeCompileUnit = new CodeCompileUnit();
             codeCompileUnit.Namespaces.Add(codenamespace);
             codeCompileUnit.AssemblyCustomAttributes.Add(CodeGenerationService.Attribute(typeof(ProxyTypesAssemblyAttribute)));
@@ -138,7 +135,7 @@ namespace Microsoft.Crm.Services.Utility
                 using (CodeDomProvider provider = CodeDomProvider.CreateProvider(language))
                     provider.GenerateCodeFromCompileUnit(codeCompileUnit, (TextWriter)streamWriter, options);
             }
-            Trace.TraceInformation("Exit {0}: Code file written to {1}", (object)MethodBase.GetCurrentMethod().Name, (object)outputFile);
+            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Exit {0}: Code file written to {1}", (object)MethodBase.GetCurrentMethod().Name, (object)outputFile);
             Console.Out.WriteLine(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "Code written to {0}.", (object)Path.GetFullPath(outputFile)));
         }
 
@@ -146,7 +143,7 @@ namespace Microsoft.Crm.Services.Utility
           OptionSetMetadataBase[] optionSetMetadata,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclarationCollection declarationCollection = new CodeTypeDeclarationCollection();
             foreach (OptionSetMetadataBase optionSetMetadataBase in optionSetMetadata)
             {
@@ -164,14 +161,14 @@ namespace Microsoft.Crm.Services.Utility
                                 declarationCollection.Add(codeTypeDeclaration);
                                 continue;
                             }
-                            Trace.TraceInformation("Skipping OptionSet {0} of type {1} from being generated.", (object)optionSetMetadataBase.Name, (object)optionSetMetadataBase.GetType());
+                            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping OptionSet {0} of type {1} from being generated.", (object)optionSetMetadataBase.Name, (object)optionSetMetadataBase.GetType());
                             continue;
                         }
                     }
                 }
-                Trace.TraceInformation("Skipping OptionSet {0} from being generated.", (object)optionSetMetadataBase.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping OptionSet {0} from being generated.", (object)optionSetMetadataBase.Name);
             }
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
             return declarationCollection;
         }
 
@@ -180,7 +177,7 @@ namespace Microsoft.Crm.Services.Utility
           OptionSetMetadataBase optionSet,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclaration codeTypeDeclaration = CodeGenerationService.Enum(serviceProvider.NamingService.GetNameForOptionSet(entity, optionSet, (IServiceProvider)serviceProvider), CodeGenerationService.Attribute(typeof(DataContractAttribute)));
             OptionSetMetadata optionSetMetadata = optionSet as OptionSetMetadata;
             if (optionSetMetadata == null)
@@ -190,9 +187,9 @@ namespace Microsoft.Crm.Services.Utility
                 if (serviceProvider.CodeFilterService.GenerateOption(option, (IServiceProvider)serviceProvider))
                     codeTypeDeclaration.Members.Add(CodeGenerationService.BuildOption(optionSet, option, serviceProvider));
                 else
-                    Trace.TraceInformation("Skipping {0}.Option {1} from being generated.", (object)optionSet.Name, (object)option.Value.Value);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.Option {1} from being generated.", (object)optionSet.Name, (object)option.Value.Value);
             }
-            Trace.TraceInformation("Exiting {0}: OptionSet Enumeration {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)codeTypeDeclaration.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: OptionSet Enumeration {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)codeTypeDeclaration.Name);
             return codeTypeDeclaration;
         }
 
@@ -201,9 +198,9 @@ namespace Microsoft.Crm.Services.Utility
           OptionMetadata option,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeMemberField codeMemberField = CodeGenerationService.Field(serviceProvider.NamingService.GetNameForOption(optionSet, option, (IServiceProvider)serviceProvider), typeof(int), (object)option.Value.Value, CodeGenerationService.Attribute(typeof(EnumMemberAttribute)));
-            Trace.TraceInformation("Exiting {0}: {1}.Option {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)optionSet.Name, (object)codeMemberField.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.Option {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)optionSet.Name, (object)codeMemberField.Name);
             return (CodeTypeMember)codeMemberField;
         }
 
@@ -211,16 +208,16 @@ namespace Microsoft.Crm.Services.Utility
           EntityMetadata[] entityMetadata,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclarationCollection declarationCollection = new CodeTypeDeclarationCollection();
             foreach (EntityMetadata entityMetadata1 in (IEnumerable<EntityMetadata>)((IEnumerable<EntityMetadata>)entityMetadata).OrderBy<EntityMetadata, string>((Func<EntityMetadata, string>)(metadata => metadata.LogicalName)))
             {
                 if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata1, (IServiceProvider)serviceProvider))
                     declarationCollection.AddRange(CodeGenerationService.BuildEntity(entityMetadata1, serviceProvider));
                 else
-                    Trace.TraceInformation("Skipping Entity {0} from being generated.", (object)entityMetadata1.LogicalName);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping Entity {0} from being generated.", (object)entityMetadata1.LogicalName);
             }
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
             return declarationCollection;
         }
 
@@ -228,7 +225,7 @@ namespace Microsoft.Crm.Services.Utility
           EntityMetadata entity,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclarationCollection declarationCollection = new CodeTypeDeclarationCollection();
             CodeTypeDeclaration entityClass = CodeGenerationService.Class(serviceProvider.NamingService.GetNameForEntity(entity, (IServiceProvider)serviceProvider), CodeGenerationService.TypeRef(CodeGenerationService.EntityClassBaseType), CodeGenerationService.Attribute(typeof(DataContractAttribute)), CodeGenerationService.Attribute(CodeGenerationService.EntityLogicalNameAttribute, CodeGenerationService.AttributeArg((object)entity.LogicalName)));
             CodeGenerationService.InitializeEntityClass(entityClass, entity);
@@ -243,7 +240,7 @@ namespace Microsoft.Crm.Services.Utility
                         entityClass.Members.Add(CodeGenerationService.BuildIdProperty(entity, attributeMetadata, serviceProvider));
                 }
                 else
-                    Trace.TraceInformation("Skipping {0}.Attribute {1} from being generated.", (object)entity.LogicalName, (object)attributeMetadata.LogicalName);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.Attribute {1} from being generated.", (object)entity.LogicalName, (object)attributeMetadata.LogicalName);
                 CodeTypeDeclaration codeTypeDeclaration = CodeGenerationService.BuildAttributeOptionSet(entity, attributeMetadata, attributeMember, serviceProvider);
                 if (codeTypeDeclaration != null)
                     declarationCollection.Add(codeTypeDeclaration);
@@ -252,7 +249,7 @@ namespace Microsoft.Crm.Services.Utility
             entityClass.Members.AddRange(CodeGenerationService.BuildManyToManyRelationships(entity, serviceProvider));
             entityClass.Members.AddRange(CodeGenerationService.BuildManyToOneRelationships(entity, serviceProvider));
             declarationCollection.Add(entityClass);
-            Trace.TraceInformation("Exiting {0}: Entity Class {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entityClass.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: Entity Class {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entityClass.Name);
             return declarationCollection;
         }
 
@@ -299,7 +296,7 @@ namespace Microsoft.Crm.Services.Utility
           AttributeMetadata attribute,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference forAttributeType = serviceProvider.TypeMappingService.GetTypeForAttributeType(entity, attribute, (IServiceProvider)serviceProvider);
             CodeMemberProperty codeMemberProperty1 = CodeGenerationService.PropertyGet(forAttributeType, serviceProvider.NamingService.GetNameForAttribute(entity, attribute, (IServiceProvider)serviceProvider));
             CodeMemberProperty codeMemberProperty2 = codeMemberProperty1;
@@ -325,7 +322,7 @@ namespace Microsoft.Crm.Services.Utility
             if (attribute.DeprecatedVersion != null)
                 codeMemberProperty1.CustomAttributes.Add(CodeGenerationService.Attribute(CodeGenerationService.ObsoleteFieldAttribute));
             codeMemberProperty1.Comments.AddRange(CodeGenerationService.CommentSummary(attribute.Description));
-            Trace.TraceInformation("Exiting {0}: {1}.Attribute {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty1.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.Attribute {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty1.Name);
             return (CodeTypeMember)codeMemberProperty1;
         }
 
@@ -380,7 +377,7 @@ namespace Microsoft.Crm.Services.Utility
           AttributeMetadata attribute,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeMemberProperty codeMemberProperty1 = CodeGenerationService.PropertyGet(CodeGenerationService.TypeRef(typeof(Guid)), "Id");
             codeMemberProperty1.CustomAttributes.Add(CodeGenerationService.Attribute(CodeGenerationService.AttributeLogicalNameAttribute, CodeGenerationService.AttributeArg((object)attribute.LogicalName)));
             codeMemberProperty1.Attributes = MemberAttributes.Public | MemberAttributes.Override;
@@ -404,7 +401,7 @@ namespace Microsoft.Crm.Services.Utility
                 codeMemberProperty1.SetStatements.Add((CodeStatement)CodeGenerationService.AssignValue((CodeExpression)CodeGenerationService.ThisProp(serviceProvider.NamingService.GetNameForAttribute(entity, attribute, (IServiceProvider)serviceProvider)), (CodeExpression)CodeGenerationService.VarRef("value")));
             else
                 codeMemberProperty1.SetStatements.Add((CodeStatement)CodeGenerationService.AssignValue((CodeExpression)CodeGenerationService.BaseProp("Id"), (CodeExpression)CodeGenerationService.VarRef("value")));
-            Trace.TraceInformation("Exiting {0}: {1}.Attribute Id defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.Attribute Id defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName);
             return (CodeTypeMember)codeMemberProperty1;
         }
 
@@ -414,21 +411,21 @@ namespace Microsoft.Crm.Services.Utility
           CodeTypeMember attributeMember,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             OptionSetMetadataBase attributeOptionSet = TypeMappingService.GetAttributeOptionSet(attribute);
             if (attributeOptionSet == null || !serviceProvider.CodeFilterService.GenerateOptionSet(attributeOptionSet, (IServiceProvider)serviceProvider))
             {
                 if (attributeOptionSet != null)
-                    Trace.TraceInformation("Exiting {0}: No type created for {1}", (object)MethodBase.GetCurrentMethod().Name, (object)attributeOptionSet.Name);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: No type created for {1}", (object)MethodBase.GetCurrentMethod().Name, (object)attributeOptionSet.Name);
                 return (CodeTypeDeclaration)null;
             }
             CodeTypeDeclaration codeTypeDeclaration = CodeGenerationService.BuildOptionSet(entity, attributeOptionSet, serviceProvider);
             if (codeTypeDeclaration == null)
             {
-                Trace.TraceInformation("Exiting {0}: No type created for {1} of type {2}", (object)MethodBase.GetCurrentMethod().Name, (object)attributeOptionSet.Name, (object)attributeOptionSet.GetType());
+                CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: No type created for {1} of type {2}", (object)MethodBase.GetCurrentMethod().Name, (object)attributeOptionSet.Name, (object)attributeOptionSet.GetType());
                 return (CodeTypeDeclaration)null;
             }
-            Trace.TraceInformation("Exiting {0}: Type {1} created for {2}", (object)MethodBase.GetCurrentMethod().Name, (object)codeTypeDeclaration.Name, (object)attributeOptionSet.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: Type {1} created for {2}", (object)MethodBase.GetCurrentMethod().Name, (object)codeTypeDeclaration.Name, (object)attributeOptionSet.Name);
             CodeGenerationService.UpdateAttributeMemberStatements(attribute, attributeMember);
             return codeTypeDeclaration;
         }
@@ -481,7 +478,7 @@ namespace Microsoft.Crm.Services.Utility
           OneToManyRelationshipMetadata oneToMany,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(CodeGenerationService.IEnumerable(serviceProvider.TypeMappingService.GetTypeForRelationship((RelationshipMetadataBase)oneToMany, otherEntity, (IServiceProvider)serviceProvider)), "CalendarRules");
             codeMemberProperty.GetStatements.AddRange(CodeGenerationService.BuildEntityCollectionAttributeGet("calendarrules", codeMemberProperty.Type));
             codeMemberProperty.SetStatements.Add((CodeExpression)CodeGenerationService.ThisMethodInvoke("OnPropertyChanging", (CodeExpression)CodeGenerationService.StringLiteral(codeMemberProperty.Name)));
@@ -489,7 +486,7 @@ namespace Microsoft.Crm.Services.Utility
             codeMemberProperty.SetStatements.Add((CodeExpression)CodeGenerationService.ThisMethodInvoke("OnPropertyChanged", (CodeExpression)CodeGenerationService.StringLiteral(codeMemberProperty.Name)));
             codeMemberProperty.CustomAttributes.Add(CodeGenerationService.Attribute(CodeGenerationService.AttributeLogicalNameAttribute, CodeGenerationService.AttributeArg((object)"calendarrules")));
             codeMemberProperty.Comments.AddRange(CodeGenerationService.CommentSummary("1:N " + oneToMany.SchemaName));
-            Trace.TraceInformation("Exiting {0}: {1}.Attribute {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.Attribute {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
             return (CodeTypeMember)codeMemberProperty;
         }
 
@@ -503,12 +500,14 @@ namespace Microsoft.Crm.Services.Utility
             foreach (OneToManyRelationshipMetadata oneToMany in (IEnumerable<OneToManyRelationshipMetadata>)((IEnumerable<OneToManyRelationshipMetadata>)entity.OneToManyRelationships).OrderBy<OneToManyRelationshipMetadata, string>((Func<OneToManyRelationshipMetadata, string>)(metadata => metadata.SchemaName)))
             {
                 EntityMetadata entityMetadata = CodeGenerationService.GetEntityMetadata(oneToMany.ReferencingEntity, serviceProvider);
-                if (string.Equals(oneToMany.SchemaName, "calendar_calendar_rules", StringComparison.Ordinal) || string.Equals(oneToMany.SchemaName, "service_calendar_rules", StringComparison.Ordinal))
+                if (entityMetadata == null)
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.OneToMany {1} from being generated. Correlating entity not returned.", (object)entity.LogicalName, (object)oneToMany.SchemaName);
+                else if (string.Equals(oneToMany.SchemaName, "calendar_calendar_rules", StringComparison.Ordinal) || string.Equals(oneToMany.SchemaName, "service_calendar_rules", StringComparison.Ordinal))
                     memberCollection.Add(CodeGenerationService.BuildCalendarRuleAttribute(entity, entityMetadata, oneToMany, serviceProvider));
                 else if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata, (IServiceProvider)serviceProvider) && serviceProvider.CodeFilterService.GenerateRelationship((RelationshipMetadataBase)oneToMany, entityMetadata, (IServiceProvider)serviceProvider))
                     memberCollection.Add(CodeGenerationService.BuildOneToMany(entity, entityMetadata, oneToMany, serviceProvider));
                 else
-                    Trace.TraceInformation("Skipping {0}.OneToMany {1} from being generated.", (object)entity.LogicalName, (object)oneToMany.SchemaName);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.OneToMany {1} from being generated.", (object)entity.LogicalName, (object)oneToMany.SchemaName);
             }
             return memberCollection;
         }
@@ -519,7 +518,7 @@ namespace Microsoft.Crm.Services.Utility
           OneToManyRelationshipMetadata oneToMany,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference typeForRelationship = serviceProvider.TypeMappingService.GetTypeForRelationship((RelationshipMetadataBase)oneToMany, otherEntity, (IServiceProvider)serviceProvider);
             EntityRole? nullable = oneToMany.ReferencingEntity == entity.LogicalName ? new EntityRole?(EntityRole.Referenced) : new EntityRole?();
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(CodeGenerationService.IEnumerable(typeForRelationship), serviceProvider.NamingService.GetNameForRelationship(entity, (RelationshipMetadataBase)oneToMany, nullable, (IServiceProvider)serviceProvider));
@@ -527,7 +526,7 @@ namespace Microsoft.Crm.Services.Utility
             codeMemberProperty.SetStatements.AddRange(CodeGenerationService.BuildRelationshipSet("SetRelatedEntities", (RelationshipMetadataBase)oneToMany, typeForRelationship, codeMemberProperty.Name, nullable));
             codeMemberProperty.CustomAttributes.Add(CodeGenerationService.BuildRelationshipSchemaNameAttribute(oneToMany.SchemaName, nullable));
             codeMemberProperty.Comments.AddRange(CodeGenerationService.CommentSummary("1:N " + oneToMany.SchemaName));
-            Trace.TraceInformation("Exiting {0}: {1}.OneToMany {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.OneToMany {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
             return (CodeTypeMember)codeMemberProperty;
         }
 
@@ -541,7 +540,9 @@ namespace Microsoft.Crm.Services.Utility
             foreach (ManyToManyRelationshipMetadata manyToMany in (IEnumerable<ManyToManyRelationshipMetadata>)((IEnumerable<ManyToManyRelationshipMetadata>)entity.ManyToManyRelationships).OrderBy<ManyToManyRelationshipMetadata, string>((Func<ManyToManyRelationshipMetadata, string>)(metadata => metadata.SchemaName)))
             {
                 EntityMetadata entityMetadata = CodeGenerationService.GetEntityMetadata(entity.LogicalName != manyToMany.Entity1LogicalName ? manyToMany.Entity1LogicalName : manyToMany.Entity2LogicalName, serviceProvider);
-                if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata, (IServiceProvider)serviceProvider) && serviceProvider.CodeFilterService.GenerateRelationship((RelationshipMetadataBase)manyToMany, entityMetadata, (IServiceProvider)serviceProvider))
+                if (entityMetadata == null)
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.ManyToMany {1} from being generated. Correlating entity not returned.", (object)entity.LogicalName, (object)manyToMany.SchemaName);
+                else if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata, (IServiceProvider)serviceProvider) && serviceProvider.CodeFilterService.GenerateRelationship((RelationshipMetadataBase)manyToMany, entityMetadata, (IServiceProvider)serviceProvider))
                 {
                     if (entityMetadata.LogicalName != entity.LogicalName)
                     {
@@ -560,7 +561,7 @@ namespace Microsoft.Crm.Services.Utility
                     }
                 }
                 else
-                    Trace.TraceInformation("Skipping {0}.ManyToMany {1} from being generated.", (object)entity.LogicalName, (object)manyToMany.SchemaName);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.ManyToMany {1} from being generated.", (object)entity.LogicalName, (object)manyToMany.SchemaName);
             }
             return memberCollection;
         }
@@ -573,14 +574,14 @@ namespace Microsoft.Crm.Services.Utility
           EntityRole? entityRole,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference typeForRelationship = serviceProvider.TypeMappingService.GetTypeForRelationship((RelationshipMetadataBase)manyToMany, otherEntity, (IServiceProvider)serviceProvider);
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(CodeGenerationService.IEnumerable(typeForRelationship), propertyName);
             codeMemberProperty.GetStatements.Add(CodeGenerationService.BuildRelationshipGet("GetRelatedEntities", (RelationshipMetadataBase)manyToMany, typeForRelationship, entityRole));
             codeMemberProperty.SetStatements.AddRange(CodeGenerationService.BuildRelationshipSet("SetRelatedEntities", (RelationshipMetadataBase)manyToMany, typeForRelationship, propertyName, entityRole));
             codeMemberProperty.CustomAttributes.Add(CodeGenerationService.BuildRelationshipSchemaNameAttribute(manyToMany.SchemaName, entityRole));
             codeMemberProperty.Comments.AddRange(CodeGenerationService.CommentSummary("N:N " + manyToMany.SchemaName));
-            Trace.TraceInformation("Exiting {0}: {1}.ManyToMany {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)propertyName);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.ManyToMany {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)propertyName);
             return (CodeTypeMember)codeMemberProperty;
         }
 
@@ -594,14 +595,16 @@ namespace Microsoft.Crm.Services.Utility
             foreach (OneToManyRelationshipMetadata manyToOne in (IEnumerable<OneToManyRelationshipMetadata>)((IEnumerable<OneToManyRelationshipMetadata>)entity.ManyToOneRelationships).OrderBy<OneToManyRelationshipMetadata, string>((Func<OneToManyRelationshipMetadata, string>)(metadata => metadata.SchemaName)))
             {
                 EntityMetadata entityMetadata = CodeGenerationService.GetEntityMetadata(manyToOne.ReferencedEntity, serviceProvider);
-                if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata, (IServiceProvider)serviceProvider) && serviceProvider.CodeFilterService.GenerateRelationship((RelationshipMetadataBase)manyToOne, entityMetadata, (IServiceProvider)serviceProvider))
+                if (entityMetadata == null)
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.ManyToOne {1} from being generated. Correlating entity not returned.", (object)entity.LogicalName, (object)manyToOne.SchemaName);
+                else if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata, (IServiceProvider)serviceProvider) && serviceProvider.CodeFilterService.GenerateRelationship((RelationshipMetadataBase)manyToOne, entityMetadata, (IServiceProvider)serviceProvider))
                 {
                     CodeTypeMember one = CodeGenerationService.BuildManyToOne(entity, entityMetadata, manyToOne, serviceProvider);
                     if (one != null)
                         memberCollection.Add(one);
                 }
                 else
-                    Trace.TraceInformation("Skipping {0}.ManyToOne {1} from being generated.", (object)entity.LogicalName, (object)manyToOne.SchemaName);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.ManyToOne {1} from being generated.", (object)entity.LogicalName, (object)manyToOne.SchemaName);
             }
             return memberCollection;
         }
@@ -612,7 +615,7 @@ namespace Microsoft.Crm.Services.Utility
           OneToManyRelationshipMetadata manyToOne,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference typeForRelationship = serviceProvider.TypeMappingService.GetTypeForRelationship((RelationshipMetadataBase)manyToOne, otherEntity, (IServiceProvider)serviceProvider);
             EntityRole? nullable = otherEntity.LogicalName == entity.LogicalName ? new EntityRole?(EntityRole.Referencing) : new EntityRole?();
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(typeForRelationship, serviceProvider.NamingService.GetNameForRelationship(entity, (RelationshipMetadataBase)manyToOne, nullable, (IServiceProvider)serviceProvider));
@@ -620,7 +623,7 @@ namespace Microsoft.Crm.Services.Utility
             AttributeMetadata attributeMetadata = ((IEnumerable<AttributeMetadata>)entity.Attributes).SingleOrDefault<AttributeMetadata>((Func<AttributeMetadata, bool>)(attribute => attribute.LogicalName == manyToOne.ReferencingAttribute));
             if (attributeMetadata == null)
             {
-                Trace.TraceInformation("Exiting {0}: {1}.ManyToOne {2} not generated since referencing attribute is not generated.", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)manyToOne.SchemaName);
+                CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.ManyToOne {2} not generated since referencing attribute is not generated.", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)manyToOne.SchemaName);
                 return (CodeTypeMember)null;
             }
             if (attributeMetadata.IsValidForCreate.GetValueOrDefault() || attributeMetadata.IsValidForUpdate.GetValueOrDefault())
@@ -628,7 +631,7 @@ namespace Microsoft.Crm.Services.Utility
             codeMemberProperty.CustomAttributes.Add(CodeGenerationService.Attribute(CodeGenerationService.AttributeLogicalNameAttribute, CodeGenerationService.AttributeArg((object)manyToOne.ReferencingAttribute)));
             codeMemberProperty.CustomAttributes.Add(CodeGenerationService.BuildRelationshipSchemaNameAttribute(manyToOne.SchemaName, nullable));
             codeMemberProperty.Comments.AddRange(CodeGenerationService.CommentSummary("N:1 " + manyToOne.SchemaName));
-            Trace.TraceInformation("Exiting {0}: {1}.ManyToOne {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.ManyToOne {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
             return (CodeTypeMember)codeMemberProperty;
         }
 
@@ -670,6 +673,8 @@ namespace Microsoft.Crm.Services.Utility
           string entityLogicalName,
           ServiceProvider serviceProvider)
         {
+            if (serviceProvider.MetadataProviderService is IMetadataProviderService2)
+                return ((IEnumerable<EntityMetadata>)((IMetadataProviderService2)serviceProvider.MetadataProviderService).LoadMetadata((IServiceProvider)serviceProvider).Entities).SingleOrDefault<EntityMetadata>((Func<EntityMetadata, bool>)(e => e.LogicalName == entityLogicalName));
             return ((IEnumerable<EntityMetadata>)serviceProvider.MetadataProviderService.LoadMetadata().Entities).SingleOrDefault<EntityMetadata>((Func<EntityMetadata, bool>)(e => e.LogicalName == entityLogicalName));
         }
 
@@ -677,7 +682,7 @@ namespace Microsoft.Crm.Services.Utility
           EntityMetadata[] entityMetadata,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclarationCollection declarationCollection = new CodeTypeDeclarationCollection();
             if (serviceProvider.CodeFilterService.GenerateServiceContext((IServiceProvider)serviceProvider))
             {
@@ -689,13 +694,13 @@ namespace Microsoft.Crm.Services.Utility
                     if (serviceProvider.CodeFilterService.GenerateEntity(entityMetadata1, (IServiceProvider)serviceProvider) && !string.Equals(entityMetadata1.LogicalName, "calendarrule", StringComparison.Ordinal))
                         codeTypeDeclaration.Members.Add(CodeGenerationService.BuildEntitySet(entityMetadata1, serviceProvider));
                     else
-                        Trace.TraceInformation("Skipping {0} entity set and AddTo method from being generated.", (object)entityMetadata1.LogicalName);
+                        CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0} entity set and AddTo method from being generated.", (object)entityMetadata1.LogicalName);
                 }
                 declarationCollection.Add(codeTypeDeclaration);
             }
             else
-                Trace.TraceInformation("Skipping data context from being generated.");
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping data context from being generated.");
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
             return declarationCollection;
         }
 
@@ -711,11 +716,11 @@ namespace Microsoft.Crm.Services.Utility
           EntityMetadata entity,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference typeForEntity = serviceProvider.TypeMappingService.GetTypeForEntity(entity, (IServiceProvider)serviceProvider);
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(CodeGenerationService.IQueryable(typeForEntity), serviceProvider.NamingService.GetNameForEntitySet(entity, (IServiceProvider)serviceProvider), (CodeStatement)CodeGenerationService.Return((CodeExpression)CodeGenerationService.ThisMethodInvoke("CreateQuery", typeForEntity)));
             codeMemberProperty.Comments.AddRange(CodeGenerationService.CommentSummary(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "Gets a binding to the set of all <see cref=\"{0}\"/> entities.", (object)typeForEntity.BaseType)));
-            Trace.TraceInformation("Exiting {0}: {1} entity set '{2}' defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1} entity set '{2}' defined", (object)MethodBase.GetCurrentMethod().Name, (object)entity.LogicalName, (object)codeMemberProperty.Name);
             return (CodeTypeMember)codeMemberProperty;
         }
 
@@ -723,16 +728,16 @@ namespace Microsoft.Crm.Services.Utility
           SdkMessages sdkMessages,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclarationCollection declarationCollection = new CodeTypeDeclarationCollection();
             foreach (SdkMessage sdkMessage in sdkMessages.MessageCollection.Values)
             {
                 if (serviceProvider.CodeMessageFilterService.GenerateSdkMessage(sdkMessage, (IServiceProvider)serviceProvider))
                     declarationCollection.AddRange(CodeGenerationService.BuildMessage(sdkMessage, serviceProvider));
                 else
-                    Trace.TraceInformation("Skipping SDK Message {0} from being generated.", (object)sdkMessage.Name);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping SDK Message {0} from being generated.", (object)sdkMessage.Name);
             }
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
             return declarationCollection;
         }
 
@@ -740,7 +745,7 @@ namespace Microsoft.Crm.Services.Utility
           SdkMessage message,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclarationCollection declarationCollection = new CodeTypeDeclarationCollection();
             foreach (SdkMessagePair sdkMessagePair in message.SdkMessagePairs.Values)
             {
@@ -750,9 +755,9 @@ namespace Microsoft.Crm.Services.Utility
                     declarationCollection.Add(CodeGenerationService.BuildMessageResponse(sdkMessagePair, sdkMessagePair.Response, serviceProvider));
                 }
                 else
-                    Trace.TraceInformation("Skipping {0}.Message Pair from being generated.", (object)message.Name, (object)sdkMessagePair.Request.Name);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping {0}.Message Pair from being generated.", (object)message.Name, (object)sdkMessagePair.Request.Name);
             }
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
             return declarationCollection;
         }
 
@@ -761,7 +766,7 @@ namespace Microsoft.Crm.Services.Utility
           SdkMessageRequest sdkMessageRequest,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclaration requestClass = CodeGenerationService.Class(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "{0}{1}", (object)serviceProvider.NamingService.GetNameForMessagePair(messagePair, (IServiceProvider)serviceProvider), (object)CodeGenerationService.RequestClassSuffix), CodeGenerationService.RequestClassBaseType, CodeGenerationService.Attribute(typeof(DataContractAttribute), CodeGenerationService.AttributeArg("Namespace", (object)messagePair.MessageNamespace)), CodeGenerationService.Attribute(typeof(RequestProxyAttribute), CodeGenerationService.AttributeArg((string)null, (object)messagePair.Request.Name)));
             bool flag = false;
             CodeStatementCollection statementCollection = new CodeStatementCollection();
@@ -772,7 +777,7 @@ namespace Microsoft.Crm.Services.Utility
                     CodeMemberProperty requestField = CodeGenerationService.BuildRequestField(sdkMessageRequest, field, serviceProvider);
                     if (requestField.Type.Options == CodeTypeReferenceOptions.GenericTypeParameter)
                     {
-                        Trace.TraceInformation("Request Field {0} is generic.  Adding generic parameter to the {1} class.", (object)requestField.Name, (object)requestClass.Name);
+                        CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Request Field {0} is generic.  Adding generic parameter to the {1} class.", (object)requestField.Name, (object)requestClass.Name);
                         flag = true;
                         CodeGenerationService.ConvertRequestToGeneric(messagePair, requestClass, requestField);
                     }
@@ -788,7 +793,7 @@ namespace Microsoft.Crm.Services.Utility
                 codeConstructor.Statements.AddRange(statementCollection);
                 requestClass.Members.Add((CodeTypeMember)codeConstructor);
             }
-            Trace.TraceInformation("Exiting {0}: SDK Request Class {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)requestClass.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: SDK Request Class {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)requestClass.Name);
             return requestClass;
         }
 
@@ -815,7 +820,7 @@ namespace Microsoft.Crm.Services.Utility
           SdkMessageResponse sdkMessageResponse,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeDeclaration codeTypeDeclaration = CodeGenerationService.Class(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "{0}{1}", (object)serviceProvider.NamingService.GetNameForMessagePair(messagePair, (IServiceProvider)serviceProvider), (object)CodeGenerationService.ResponseClassSuffix), CodeGenerationService.ResponseClassBaseType, CodeGenerationService.Attribute(typeof(DataContractAttribute), CodeGenerationService.AttributeArg("Namespace", (object)messagePair.MessageNamespace)), CodeGenerationService.Attribute(typeof(ResponseProxyAttribute), CodeGenerationService.AttributeArg((string)null, (object)messagePair.Request.Name)));
             codeTypeDeclaration.Members.Add((CodeTypeMember)CodeGenerationService.Constructor());
             if (sdkMessageResponse != null && sdkMessageResponse.ResponseFields != null & sdkMessageResponse.ResponseFields.Count > 0)
@@ -824,8 +829,8 @@ namespace Microsoft.Crm.Services.Utility
                     codeTypeDeclaration.Members.Add((CodeTypeMember)CodeGenerationService.BuildResponseField(sdkMessageResponse, field, serviceProvider));
             }
             else
-                Trace.TraceInformation("SDK Response Class {0} has not fields", (object)codeTypeDeclaration.Name);
-            Trace.TraceInformation("Exiting {0}: SDK Response Class {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)codeTypeDeclaration.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("SDK Response Class {0} has not fields", (object)codeTypeDeclaration.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: SDK Response Class {1} defined", (object)MethodBase.GetCurrentMethod().Name, (object)codeTypeDeclaration.Name);
             return codeTypeDeclaration;
         }
 
@@ -834,14 +839,14 @@ namespace Microsoft.Crm.Services.Utility
           SdkMessageRequestField field,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference typeForRequestField = serviceProvider.TypeMappingService.GetTypeForRequestField(field, (IServiceProvider)serviceProvider);
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(typeForRequestField, serviceProvider.NamingService.GetNameForRequestField(request, field, (IServiceProvider)serviceProvider));
             codeMemberProperty.HasSet = true;
             codeMemberProperty.HasGet = true;
             codeMemberProperty.GetStatements.Add(CodeGenerationService.BuildRequestFieldGetStatement(field, typeForRequestField));
             codeMemberProperty.SetStatements.Add((CodeStatement)CodeGenerationService.BuildRequestFieldSetStatement(field));
-            Trace.TraceInformation("Exiting {0}: {1}.Request Property {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)request.Name, (object)codeMemberProperty.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.Request Property {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)request.Name, (object)codeMemberProperty.Name);
             return codeMemberProperty;
         }
 
@@ -863,13 +868,13 @@ namespace Microsoft.Crm.Services.Utility
           SdkMessageResponseField field,
           ServiceProvider serviceProvider)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             CodeTypeReference forResponseField = serviceProvider.TypeMappingService.GetTypeForResponseField(field, (IServiceProvider)serviceProvider);
             CodeMemberProperty codeMemberProperty = CodeGenerationService.PropertyGet(forResponseField, serviceProvider.NamingService.GetNameForResponseField(response, field, (IServiceProvider)serviceProvider));
             codeMemberProperty.HasSet = false;
             codeMemberProperty.HasGet = true;
             codeMemberProperty.GetStatements.Add(CodeGenerationService.BuildResponseFieldGetStatement(field, forResponseField));
-            Trace.TraceInformation("Exiting {0}: {1}.Response Property {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)response.Id, (object)codeMemberProperty.Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}: {1}.Response Property {2} defined", (object)MethodBase.GetCurrentMethod().Name, (object)response.Id, (object)codeMemberProperty.Name);
             return codeMemberProperty;
         }
 

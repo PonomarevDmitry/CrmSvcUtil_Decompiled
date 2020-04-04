@@ -3,17 +3,21 @@ using System.Collections.Generic;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>An SDK message response</summary>
     public sealed class SdkMessageResponse
     {
         private Guid _id;
         private Dictionary<int, SdkMessageResponseField> _responseFields;
 
+        /// <summary>Constructor</summary>
+        /// <param name="id">Message response id</param>
         public SdkMessageResponse(Guid id)
         {
             this._id = id;
             this._responseFields = new Dictionary<int, SdkMessageResponseField>();
         }
 
+        /// <summary>Gets the message response id</summary>
         public Guid Id
         {
             get
@@ -22,6 +26,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the message response fields</summary>
         public Dictionary<int, SdkMessageResponseField> ResponseFields
         {
             get

@@ -1,27 +1,31 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Live device</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [XmlRoot("Data")]
     public sealed class LiveDevice
     {
+        /// <summary>Gets or sets the device version</summary>
         [XmlAttribute("version")]
         public int Version { get; set; }
 
+        /// <summary>Gets or sets the device user name</summary>
         [XmlElement("User")]
         public DeviceUserName User { get; set; }
 
-        [SuppressMessage("Microsoft.Design", "CA1059:MembersShouldNotExposeCertainConcreteTypes", Justification = "This is required for proper XML Serialization", MessageId = "System.Xml.XmlNode")]
+        /// <summary>Gets or sets the device token</summary>
         [XmlElement("Token")]
         public XmlNode Token { get; set; }
 
+        /// <summary>Gets or sets the device token expiry</summary>
         [XmlElement("Expiry")]
         public string Expiry { get; set; }
 
+        /// <summary>Gets or sets the device clock skew</summary>
         [XmlElement("ClockSkew")]
         public string ClockSkew { get; set; }
     }

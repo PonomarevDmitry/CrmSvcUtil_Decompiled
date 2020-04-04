@@ -1,7 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>An SDK message response field</summary>
     public sealed class SdkMessageResponseField
     {
         private int _index;
@@ -9,6 +8,11 @@ namespace Microsoft.Crm.Services.Utility
         private string _clrFormatter;
         private string _value;
 
+        /// <summary>Constructor</summary>
+        /// <param name="index">Field index</param>
+        /// <param name="name">Field name</param>
+        /// <param name="clrFormatter">Field CLR formatter</param>
+        /// <param name="value">Field value</param>
         public SdkMessageResponseField(int index, string name, string clrFormatter, string value)
         {
             this._clrFormatter = clrFormatter;
@@ -17,6 +21,7 @@ namespace Microsoft.Crm.Services.Utility
             this._value = value;
         }
 
+        /// <summary>Gets the message response field index</summary>
         public int Index
         {
             get
@@ -25,6 +30,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the message response field name</summary>
         public string Name
         {
             get
@@ -33,7 +39,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "CLR")]
+        /// <summary>Gets the message response field CLR formatter</summary>
         public string CLRFormatter
         {
             get
@@ -42,6 +48,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the message response field value</summary>
         public string Value
         {
             get

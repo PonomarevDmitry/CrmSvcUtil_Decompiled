@@ -7,23 +7,29 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Device user name</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class DeviceUserName
     {
+        /// <summary>Default constructor</summary>
         public DeviceUserName()
         {
             this.UserNameType = "Logical";
         }
 
+        /// <summary>Gets or sets the device user name</summary>
         [XmlAttribute("username")]
         public string DeviceName { get; set; }
 
+        /// <summary>Gets or sets the device user type</summary>
         [XmlAttribute("type")]
         public string UserNameType { get; set; }
 
+        /// <summary>Gets or sets the device user password</summary>
         [XmlElement("Pwd")]
         public string EncryptedPassword { get; set; }
 
+        /// <summary>Gets or sets the device id</summary>
         public string DeviceId
         {
             get
@@ -32,6 +38,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the device user's decrypted password</summary>
         [XmlIgnore]
         public string DecryptedPassword
         {
@@ -53,6 +60,8 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Creates client credentials for the device user</summary>
+        /// <returns>An instance of ClientCredentials</returns>
         public ClientCredentials ToClientCredentials()
         {
             return new ClientCredentials()

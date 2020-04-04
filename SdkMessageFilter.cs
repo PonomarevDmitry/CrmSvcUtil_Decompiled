@@ -2,6 +2,7 @@ using System;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>An SDK message filter</summary>
     public sealed class SdkMessageFilter
     {
         private int _primaryObjectTypeCode;
@@ -9,11 +10,18 @@ namespace Microsoft.Crm.Services.Utility
         private Guid _id;
         private bool _isVisible;
 
+        /// <summary>Constructor</summary>
+        /// <param name="id">Message filter id</param>
         public SdkMessageFilter(Guid id)
         {
             this._id = id;
         }
 
+        /// <summary>Constructor</summary>
+        /// <param name="id">Message filter id</param>
+        /// <param name="primaryObjectTypeCode">Primary object type code</param>
+        /// <param name="secondaryObjectTypeCode">Secondary object type code</param>
+        /// <param name="isVisible">Whether the message filter is visible</param>
         public SdkMessageFilter(
           Guid id,
           int primaryObjectTypeCode,
@@ -26,6 +34,7 @@ namespace Microsoft.Crm.Services.Utility
             this.IsVisible = isVisible;
         }
 
+        /// <summary>Gets the message filter id</summary>
         public Guid Id
         {
             get
@@ -34,6 +43,9 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>
+        /// Gets or sets the message filter primary object type code
+        /// </summary>
         public int PrimaryObjectTypeCode
         {
             get
@@ -46,6 +58,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message secondary object type code</summary>
         public int SecondaryObjectTypeCode
         {
             get
@@ -58,6 +71,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets whether the message filter is visible</summary>
         public bool IsVisible
         {
             get

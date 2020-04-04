@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Reflection;
 
 namespace Microsoft.Crm.Services.Utility
@@ -14,13 +13,13 @@ namespace Microsoft.Crm.Services.Utility
           CrmSvcUtilParameters parameters)
         {
             string index = typeof(TIService).Name.Substring(1);
-            Trace.TraceInformation("Creating instance of {0}", (object)typeof(TIService).Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Creating instance of {0}", (object)typeof(TIService).Name);
             string typeName = parameterValue;
             if (string.IsNullOrEmpty(typeName))
                 typeName = ConfigurationManager.AppSettings[index];
             if (string.IsNullOrEmpty(typeName))
                 return defaultServiceInstance;
-            Trace.TraceInformation("Looking for extension named {0}", (object)typeName);
+            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Looking for extension named {0}", (object)typeName);
             Type type = Type.GetType(typeName, false);
             if (type == (Type)null)
                 throw new NotSupportedException("Could not load provider of type '" + typeName + "'");

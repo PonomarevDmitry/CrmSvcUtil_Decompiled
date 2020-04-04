@@ -3,13 +3,19 @@ using System.Globalization;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    internal sealed class MessagePagingInfo
+    /// <summary>Message paging info</summary>
+    public sealed class MessagePagingInfo
     {
-        internal string PagingCookig { get; set; }
+        /// <summary>Gets or sets the paging cookie</summary>
+        public string PagingCookig { get; set; }
 
-        internal bool HasMoreRecords { get; set; }
+        /// <summary>Gets or sets whether the paging info has more records</summary>
+        public bool HasMoreRecords { get; set; }
 
-        internal static MessagePagingInfo FromResultSet(ResultSet resultSet)
+        /// <summary>
+        /// Gets the message paging info from a set of message results
+        /// </summary>
+        public static MessagePagingInfo FromResultSet(ResultSet resultSet)
         {
             return new MessagePagingInfo()
             {

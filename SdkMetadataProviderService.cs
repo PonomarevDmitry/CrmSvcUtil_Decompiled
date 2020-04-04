@@ -1,20 +1,21 @@
+using CrmSvcUtil.InteractiveLogin;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Tooling.Connector;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Data.Common;
 using System.Globalization;
-using System.Net;
-using System.ServiceModel.Description;
+using System.Text;
 using System.Xml.Linq;
 
 namespace Microsoft.Crm.Services.Utility
 {
-    internal sealed class SdkMetadataProviderService : IMetadataProviderService
+    internal sealed class SdkMetadataProviderService : IMetadataProviderService2, IMetadataProviderService
     {
         private readonly CrmSvcUtilParameters _parameters;
         private IOrganizationMetadata _organizationMetadata;
+        private CrmServiceClient crmSvcCli;
 
         internal SdkMetadataProviderService(CrmSvcUtilParameters parameters)
         {
@@ -29,20 +30,58 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
-        IOrganizationMetadata IMetadataProviderService.LoadMetadata()
+        public IOrganizationMetadata LoadMetadata()
         {
             if (this._organizationMetadata == null)
             {
-                using (OrganizationServiceProxy organizationServiceEndpoint = this.CreateOrganizationServiceEndpoint())
-                {
-                    organizationServiceEndpoint.Timeout = new TimeSpan(0, 5, 0);
-                    this._organizationMetadata = this.CreateOrganizationMetadata(this.RetrieveEntities((IOrganizationService)organizationServiceEndpoint), this.RetrieveOptionSets((IOrganizationService)organizationServiceEndpoint), this.RetrieveSdkRequests((IOrganizationService)organizationServiceEndpoint));
-                }
+                IOrganizationService organizationServiceEndpoint = this.CreateOrganizationServiceEndpoint();
+                if (organizationServiceEndpoint == null)
+                    throw new Exception("Connection to CRM is not established. Aborting process.");
+                this.SetConnectionTimeoutValues();
+                this._organizationMetadata = this.CreateOrganizationMetadata(this.RetrieveEntities(organizationServiceEndpoint), this.RetrieveOptionSets(organizationServiceEndpoint), this.RetrieveSdkRequests(organizationServiceEndpoint));
             }
             return this._organizationMetadata;
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        public IOrganizationMetadata LoadMetadata(IServiceProvider service)
+        {
+            if (this._organizationMetadata == null)
+            {
+                if (service == null)
+                    return (IOrganizationMetadata)null;
+                ServiceProvider serviceProvider = (ServiceProvider)service;
+                IOrganizationService organizationServiceEndpoint = this.CreateOrganizationServiceEndpoint();
+                if (organizationServiceEndpoint == null)
+                    throw new Exception("Connection to CRM is not established. Aborting process.");
+                this.SetConnectionTimeoutValues();
+                this._organizationMetadata = this.CreateOrganizationMetadata(serviceProvider.MetadataProviderQueryServcie.RetrieveEntities(organizationServiceEndpoint), serviceProvider.MetadataProviderQueryServcie.RetrieveOptionSets(organizationServiceEndpoint), serviceProvider.MetadataProviderQueryServcie.RetrieveSdkRequests(organizationServiceEndpoint));
+            }
+            return this._organizationMetadata;
+        }
+
+        /// <summary>
+        /// Updates the timeout value to extend the amount of item that a request will wait.
+        /// </summary>
+        private void SetConnectionTimeoutValues()
+        {
+            if (this.crmSvcCli == null)
+                return;
+            if (this.crmSvcCli.ActiveAuthenticationType == Microsoft.Xrm.Tooling.Connector.AuthenticationType.OAuth)
+            {
+                if (this.crmSvcCli.OrganizationWebProxyClient == null)
+                    return;
+                this.crmSvcCli.OrganizationWebProxyClient.InnerChannel.OperationTimeout = TimeSpan.FromMinutes(20.0);
+                this.crmSvcCli.OrganizationWebProxyClient.Endpoint.Binding.SendTimeout = TimeSpan.FromMinutes(20.0);
+                this.crmSvcCli.OrganizationWebProxyClient.Endpoint.Binding.ReceiveTimeout = TimeSpan.FromMinutes(20.0);
+            }
+            else
+            {
+                if (this.crmSvcCli.OrganizationServiceProxy == null)
+                    return;
+                this.crmSvcCli.OrganizationServiceProxy.Timeout = TimeSpan.FromMinutes(20.0);
+            }
+        }
+
         private EntityMetadata[] RetrieveEntities(IOrganizationService service)
         {
             OrganizationRequest request = new OrganizationRequest("RetrieveAllEntities");
@@ -51,7 +90,6 @@ namespace Microsoft.Crm.Services.Utility
             return (EntityMetadata[])service.Execute(request).Results["EntityMetadata"];
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private OptionSetMetadataBase[] RetrieveOptionSets(
           IOrganizationService service)
         {
@@ -80,7 +118,6 @@ namespace Microsoft.Crm.Services.Utility
             return messages;
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private string SetPagingCookie(string fetchQuery, string pagingCookie, int pageNumber)
         {
             XDocument xdocument = XDocument.Parse(fetchQuery);
@@ -90,48 +127,6 @@ namespace Microsoft.Crm.Services.Utility
             return xdocument.ToString();
         }
 
-        private ClientCredentials CreateDeviceCredentials(
-          IServiceConfiguration<IOrganizationService> orgServiceConfig)
-        {
-            if (orgServiceConfig.AuthenticationType != AuthenticationProviderType.LiveId)
-                return (ClientCredentials)null;
-            if (string.IsNullOrEmpty(this.Parameters.DeviceID) || string.IsNullOrEmpty(this.Parameters.DevicePassword))
-                return DeviceIdManager.LoadOrRegisterDevice(CrmSvcUtil.ApplicationId, orgServiceConfig.CurrentIssuer.IssuerAddress.Uri);
-            return new ClientCredentials()
-            {
-                UserName = {
-          UserName = this.Parameters.DeviceID,
-          Password = this.Parameters.DevicePassword
-        }
-            };
-        }
-
-        private ClientCredentials CreateCredentials(
-          IServiceConfiguration<IOrganizationService> orgServiceConfig)
-        {
-            ClientCredentials clientCredentials = new ClientCredentials();
-            if (this.ShouldUseWindowsCredentials(orgServiceConfig))
-            {
-                clientCredentials.Windows.ClientCredential = new NetworkCredential();
-                clientCredentials.Windows.ClientCredential.UserName = SdkMetadataProviderService.GetValueOrDefault(this.Parameters.UserName, (string)null);
-                clientCredentials.Windows.ClientCredential.Password = SdkMetadataProviderService.GetValueOrDefault(this.Parameters.Password, string.Empty);
-                clientCredentials.Windows.ClientCredential.Domain = SdkMetadataProviderService.GetValueOrDefault(this.Parameters.Domain, (string)null);
-            }
-            else
-            {
-                clientCredentials.UserName.UserName = SdkMetadataProviderService.GetValueOrDefault(this.Parameters.UserName, (string)null);
-                clientCredentials.UserName.Password = SdkMetadataProviderService.GetValueOrDefault(this.Parameters.Password, (string)null);
-            }
-            return clientCredentials;
-        }
-
-        private bool ShouldUseWindowsCredentials(
-          IServiceConfiguration<IOrganizationService> orgServiceConfig)
-        {
-            return (orgServiceConfig.AuthenticationType != AuthenticationProviderType.OnlineFederation || string.IsNullOrEmpty(this.Parameters.UserName)) && (orgServiceConfig.IssuerEndpoints == null || !orgServiceConfig.IssuerEndpoints.ContainsKey(TokenServiceCredentialType.Username.ToString()));
-        }
-
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private IOrganizationMetadata CreateOrganizationMetadata(
           EntityMetadata[] entityMetadata,
           OptionSetMetadataBase[] optionSetMetadata,
@@ -140,16 +135,63 @@ namespace Microsoft.Crm.Services.Utility
             return (IOrganizationMetadata)new OrganizationMetadata(entityMetadata, optionSetMetadata, messages);
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA9888:DisposeObjectsCorrectly", Justification = "Disposing the Proxy makes the channel unusable")]
-        private OrganizationServiceProxy CreateOrganizationServiceEndpoint()
+        private IOrganizationService CreateOrganizationServiceEndpoint()
         {
-            Uri result = (Uri)null;
-            if (!Uri.TryCreate(this.Parameters.Url, UriKind.RelativeOrAbsolute, out result))
-                throw new InvalidOperationException(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "Cannot connect to organization service at {0}", (object)this.Parameters.Url));
-            IServiceConfiguration<IOrganizationService> configuration = ServiceConfigurationFactory.CreateConfiguration<IOrganizationService>(result);
-            ClientCredentials credentials = this.CreateCredentials(configuration);
-            ClientCredentials deviceCredentials = this.CreateDeviceCredentials(configuration);
-            return new OrganizationServiceProxy(result, (Uri)null, credentials, deviceCredentials);
+            string str = string.IsNullOrEmpty(this.Parameters.ConnectionProfileName) ? "default" : this.Parameters.ConnectionProfileName;
+            if (!string.IsNullOrEmpty(this.Parameters.ConnectionAppName))
+            {
+                CRMInteractiveLogin interactiveLogin = new CRMInteractiveLogin();
+                interactiveLogin.HostProfileName = str;
+                interactiveLogin.HostApplicatioNameOveride = this.Parameters.ConnectionAppName;
+                interactiveLogin.ShowDialog();
+                if (interactiveLogin.CrmConnectionMgr != null && interactiveLogin.CrmConnectionMgr.CrmSvc != null && interactiveLogin.CrmConnectionMgr.CrmSvc.IsReady)
+                {
+                    this.crmSvcCli = interactiveLogin.CrmConnectionMgr.CrmSvc;
+                    if (this.crmSvcCli.OrganizationServiceProxy == null)
+                        return (IOrganizationService)this.crmSvcCli.OrganizationWebProxyClient;
+                    return (IOrganizationService)this.crmSvcCli.OrganizationServiceProxy;
+                }
+                Console.WriteLine(this.crmSvcCli.LastCrmError);
+                return (IOrganizationService)null;
+            }
+            if (!this.Parameters.UseInteractiveLogin)
+            {
+                this.crmSvcCli = new CrmServiceClient(this.GetConnectionString());
+                if (this.crmSvcCli != null && this.crmSvcCli.IsReady)
+                {
+                    if (this.crmSvcCli.OrganizationServiceProxy == null)
+                        return (IOrganizationService)this.crmSvcCli.OrganizationWebProxyClient;
+                    return (IOrganizationService)this.crmSvcCli.OrganizationServiceProxy;
+                }
+                Console.WriteLine(this.crmSvcCli.LastCrmError);
+                return (IOrganizationService)null;
+            }
+            CRMInteractiveLogin interactiveLogin1 = new CRMInteractiveLogin();
+            interactiveLogin1.ForceDirectLogin = true;
+            interactiveLogin1.HostProfileName = str;
+            if (!string.IsNullOrEmpty(this.Parameters.ConnectionAppName))
+                interactiveLogin1.HostApplicatioNameOveride = this.Parameters.ConnectionAppName;
+            if (!interactiveLogin1.ShowDialog().Value)
+            {
+                Console.WriteLine("User aborted Login");
+                return (IOrganizationService)null;
+            }
+            try
+            {
+                if (interactiveLogin1.CrmConnectionMgr != null && interactiveLogin1.CrmConnectionMgr.CrmSvc != null && interactiveLogin1.CrmConnectionMgr.CrmSvc.IsReady)
+                {
+                    this.crmSvcCli = interactiveLogin1.CrmConnectionMgr.CrmSvc;
+                    return this.crmSvcCli.OrganizationServiceProxy != null ? (IOrganizationService)this.crmSvcCli.OrganizationServiceProxy : (IOrganizationService)this.crmSvcCli.OrganizationWebProxyClient;
+                }
+                Console.WriteLine(this.crmSvcCli.LastCrmError);
+                return (IOrganizationService)null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to Login:");
+                Console.WriteLine(ex.Message);
+                return (IOrganizationService)null;
+            }
         }
 
         private static string GetValueOrDefault(string value, string defaultValue)
@@ -157,6 +199,38 @@ namespace Microsoft.Crm.Services.Utility
             if (string.IsNullOrWhiteSpace(value))
                 return defaultValue;
             return value;
+        }
+
+        /// <summary>
+        /// Builds a connection string from the passed in parameters.
+        /// </summary>
+        /// <returns></returns>
+        private string GetConnectionString()
+        {
+            if (!string.IsNullOrEmpty(this.Parameters.ConnectionString))
+                return this.Parameters.ConnectionString;
+            Uri result = (Uri)null;
+            if (!Uri.TryCreate(this.Parameters.Url, UriKind.RelativeOrAbsolute, out result))
+                throw new InvalidOperationException(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "Cannot connect to organization service at {0}", (object)this.Parameters.Url));
+            StringBuilder builder = new StringBuilder();
+            DbConnectionStringBuilder.AppendKeyValuePair(builder, "Server", result.ToString());
+            DbConnectionStringBuilder.AppendKeyValuePair(builder, "UserName", this.Parameters.UserName);
+            DbConnectionStringBuilder.AppendKeyValuePair(builder, "Password", this.Parameters.Password);
+            if (!string.IsNullOrEmpty(this.Parameters.Domain))
+            {
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "Domain", this.Parameters.Domain);
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "AuthType", "AD");
+            }
+            else if (this.Parameters.UseOAuth)
+            {
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "AuthType", "OAuth");
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "ClientId", "2ad88395-b77d-4561-9441-d0e40824f9bc");
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "RedirectUri", "app://5d3e90d6-aa8e-48a8-8f2c-58b45cc67315");
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "LoginPrompt", "Never");
+            }
+            else
+                DbConnectionStringBuilder.AppendKeyValuePair(builder, "AuthType", "Office365");
+            return builder.ToString();
         }
     }
 }

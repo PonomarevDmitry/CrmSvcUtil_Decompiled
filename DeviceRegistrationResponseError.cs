@@ -5,12 +5,14 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Device registration response error</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [XmlRoot("Error")]
     public sealed class DeviceRegistrationResponseError
     {
         private string _code;
 
+        /// <summary>Gets or sets the device registration error code</summary>
         [XmlAttribute("Code")]
         public string Code
         {

@@ -2,6 +2,7 @@ using System;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <remarks>Represents a command line argument.</remarks>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     internal sealed class CommandLineArgumentAttribute : Attribute
     {
@@ -12,6 +13,9 @@ namespace Microsoft.Crm.Services.Utility
         private string _parameterDescription;
         private string _sampleUsageValue;
 
+        /// <summary>Creates a new command line argument attribute.</summary>
+        /// <param name="argType">Type of argument represented by the property.</param>
+        /// <param name="name">Switch used by the command line argument</param>
         internal CommandLineArgumentAttribute(ArgumentType argType, string name)
         {
             this._argumentType = argType;
@@ -21,6 +25,7 @@ namespace Microsoft.Crm.Services.Utility
             this._parameterDescription = string.Empty;
         }
 
+        /// <summary>Type of command line argument</summary>
         public ArgumentType Type
         {
             get
@@ -29,6 +34,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Switch used to represent the argument.</summary>
         public string Name
         {
             get
@@ -41,6 +47,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Shortcut switch used to represent the argument.</summary>
         public string Shortcut
         {
             get
@@ -53,6 +60,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Description of the command line argument.</summary>
         public string Description
         {
             get
@@ -65,6 +73,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Description of the parameter.</summary>
         public string ParameterDescription
         {
             get

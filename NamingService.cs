@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -65,23 +66,10 @@ namespace Microsoft.Crm.Services.Utility
                         name = localizedLabel.Label;
                 }
             }
-            int? nullable;
             if (string.IsNullOrEmpty(name))
-            {
-                CultureInfo invariantCulture = CultureInfo.InvariantCulture;
-                object[] objArray = new object[1];
-                nullable = optionMetadata.Value;
-                objArray[0] = (object)nullable.Value;
-                name = string.Format((IFormatProvider)invariantCulture, "UnknownLabel{0}", objArray);
-            }
+                name = string.Format((IFormatProvider)CultureInfo.InvariantCulture, "UnknownLabel{0}", (object)optionMetadata.Value.Value);
             string validName = NamingService.CreateValidName(name);
-            Dictionary<string, string> knowNames = this._knowNames;
-            string str1 = optionSetMetadata.MetadataId.Value.ToString();
-            nullable = optionMetadata.Value;
-            string str2 = nullable.Value.ToString((IFormatProvider)CultureInfo.InvariantCulture);
-            string key = str1 + str2;
-            string str3 = validName;
-            knowNames.Add(key, str3);
+            this._knowNames.Add(optionSetMetadata.MetadataId.Value.ToString() + optionMetadata.Value.Value.ToString((IFormatProvider)CultureInfo.InvariantCulture), validName);
             return validName;
         }
 
@@ -101,13 +89,34 @@ namespace Microsoft.Crm.Services.Utility
           AttributeMetadata attributeMetadata,
           IServiceProvider services)
         {
-            if (this._knowNames.ContainsKey(entityMetadata.MetadataId.Value.ToString() + (object)attributeMetadata.MetadataId.Value))
-                return this._knowNames[entityMetadata.MetadataId.Value.ToString() + (object)attributeMetadata.MetadataId.Value];
+            Dictionary<string, string> knowNames1 = this._knowNames;
+            Guid guid1 = entityMetadata.MetadataId.Value;
+            string str1 = guid1.ToString();
+            guid1 = attributeMetadata.MetadataId.Value;
+            string str2 = guid1.ToString();
+            string key1 = str1 + str2;
+            if (knowNames1.ContainsKey(key1))
+            {
+                Dictionary<string, string> knowNames2 = this._knowNames;
+                Guid guid2 = entityMetadata.MetadataId.Value;
+                string str3 = guid2.ToString();
+                guid2 = attributeMetadata.MetadataId.Value;
+                string str4 = guid2.ToString();
+                string index = str3 + str4;
+                return knowNames2[index];
+            }
             string validName = NamingService.CreateValidName(StaticNamingService.GetNameForAttribute(attributeMetadata) ?? attributeMetadata.SchemaName);
             INamingService service = (INamingService)services.GetService(typeof(INamingService));
             if (this._reservedAttributeNames.Contains(validName) || validName == service.GetNameForEntity(entityMetadata, services))
                 validName += "1";
-            this._knowNames.Add(entityMetadata.MetadataId.Value.ToString() + (object)attributeMetadata.MetadataId.Value, validName);
+            Dictionary<string, string> knowNames3 = this._knowNames;
+            Guid guid3 = entityMetadata.MetadataId.Value;
+            string str5 = guid3.ToString();
+            guid3 = attributeMetadata.MetadataId.Value;
+            string str6 = guid3.ToString();
+            string key2 = str5 + str6;
+            string str7 = validName;
+            knowNames3.Add(key2, str7);
             return validName;
         }
 
@@ -117,14 +126,43 @@ namespace Microsoft.Crm.Services.Utility
           EntityRole? reflexiveRole,
           IServiceProvider services)
         {
-            string str = reflexiveRole.HasValue ? reflexiveRole.Value.ToString() : string.Empty;
-            if (this._knowNames.ContainsKey(entityMetadata.MetadataId.Value.ToString() + (object)relationshipMetadata.MetadataId.Value + str))
-                return this._knowNames[entityMetadata.MetadataId.Value.ToString() + (object)relationshipMetadata.MetadataId.Value + str];
+            string str1 = reflexiveRole.HasValue ? reflexiveRole.Value.ToString() : string.Empty;
+            Dictionary<string, string> knowNames1 = this._knowNames;
+            Guid? metadataId = entityMetadata.MetadataId;
+            string str2 = metadataId.Value.ToString();
+            metadataId = relationshipMetadata.MetadataId;
+            string str3 = metadataId.Value.ToString();
+            string str4 = str1;
+            string key1 = str2 + str3 + str4;
+            if (knowNames1.ContainsKey(key1))
+            {
+                Dictionary<string, string> knowNames2 = this._knowNames;
+                metadataId = entityMetadata.MetadataId;
+                Guid guid = metadataId.Value;
+                string str5 = guid.ToString();
+                metadataId = relationshipMetadata.MetadataId;
+                guid = metadataId.Value;
+                string str6 = guid.ToString();
+                string str7 = str1;
+                string index = str5 + str6 + str7;
+                return knowNames2[index];
+            }
             string validName = NamingService.CreateValidName(!reflexiveRole.HasValue ? relationshipMetadata.SchemaName : (reflexiveRole.Value == EntityRole.Referenced ? "Referenced" + relationshipMetadata.SchemaName : "Referencing" + relationshipMetadata.SchemaName));
+            Dictionary<string, string> dictionary = this._knowNames.Where<KeyValuePair<string, string>>((Func<KeyValuePair<string, string>, bool>)(d => d.Key.StartsWith(entityMetadata.MetadataId.Value.ToString()))).ToDictionary<KeyValuePair<string, string>, string, string>((Func<KeyValuePair<string, string>, string>)(d => d.Key), (Func<KeyValuePair<string, string>, string>)(d => d.Value));
             INamingService service = (INamingService)services.GetService(typeof(INamingService));
-            if (this._reservedAttributeNames.Contains(validName) || validName == service.GetNameForEntity(entityMetadata, services))
+            if (this._reservedAttributeNames.Contains(validName) || validName == service.GetNameForEntity(entityMetadata, services) || dictionary.ContainsValue(validName))
                 validName += "1";
-            this._knowNames.Add(entityMetadata.MetadataId.Value.ToString() + (object)relationshipMetadata.MetadataId.Value + str, validName);
+            Dictionary<string, string> knowNames3 = this._knowNames;
+            metadataId = entityMetadata.MetadataId;
+            Guid guid1 = metadataId.Value;
+            string str8 = guid1.ToString();
+            metadataId = relationshipMetadata.MetadataId;
+            guid1 = metadataId.Value;
+            string str9 = guid1.ToString();
+            string str10 = str1;
+            string key2 = str8 + str9 + str10;
+            string str11 = validName;
+            knowNames3.Add(key2, str11);
             return validName;
         }
 

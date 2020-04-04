@@ -1,27 +1,36 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <remarks>Utility class to parse command line arguments.</remarks>
     internal sealed class CommandLineParser
     {
+        /// <summary>The object that contains the properties to set.</summary>
         private ICommandLineArgumentSource _argsSource;
+        /// <summary>
+        /// A mapping of argument switches to command line arguments.
+        /// </summary>
         private Dictionary<string, CommandLineArgument> _argumentsMap;
+        /// <summary>A list of all of the arguments that are supported</summary>
         private List<CommandLineArgument> _arguments;
 
+        /// <summary>
+        /// Creates a new command line parser for the given object.
+        /// </summary>
+        /// <param name="argsSource">The object containing the properties representing the command line args to set.</param>
         internal CommandLineParser(ICommandLineArgumentSource argsSource)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
-            Trace.TraceInformation("Creating CommandLineParser for {0}.", (object)argsSource.GetType().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Creating CommandLineParser for {0}.", (object)argsSource.GetType().Name);
             this._argsSource = argsSource;
             this._arguments = new List<CommandLineArgument>();
             this._argumentsMap = this.GetPropertyMap();
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         private ICommandLineArgumentSource ArgumentsSource
@@ -50,7 +59,7 @@ namespace Microsoft.Crm.Services.Utility
 
         internal void ParseArguments(string[] args)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             if (args != null)
             {
                 foreach (string str in args)
@@ -61,7 +70,7 @@ namespace Microsoft.Crm.Services.Utility
                         string argumentName = CommandLineParser.GetArgumentName(str, out argumentValue);
                         if (!string.IsNullOrEmpty(argumentName) && this.ArgumentsMap.ContainsKey(argumentName))
                         {
-                            Trace.TraceInformation("Setting argument {0} to value {1}", (object)argumentName, (object)argumentValue);
+                            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Setting argument {0} to value {1}", (object)argumentName, (object)argumentValue);
                             this.ArgumentsMap[argumentName].SetValue((object)this.ArgumentsSource, argumentValue);
                         }
                         else
@@ -72,45 +81,47 @@ namespace Microsoft.Crm.Services.Utility
                 }
             }
             this.ParseConfigArguments();
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         private void ParseConfigArguments()
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             foreach (string allKey in ConfigurationManager.AppSettings.AllKeys)
             {
                 string upperInvariant = allKey.ToUpperInvariant();
                 string appSetting = ConfigurationManager.AppSettings[allKey];
                 if (this.ArgumentsMap.ContainsKey(upperInvariant) && !this.ArgumentsMap[upperInvariant].IsSet)
                 {
-                    Trace.TraceInformation("Setting argument {0} to config value {1}", (object)upperInvariant, (object)appSetting);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Setting argument {0} to config value {1}", (object)upperInvariant, (object)appSetting);
                     this.ArgumentsMap[upperInvariant].SetValue((object)this.ArgumentsSource, appSetting);
                 }
                 else
-                    Trace.TraceInformation("Skipping config value {0} as it is an unknown argument.", (object)upperInvariant);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping config value {0} as it is an unknown argument.", (object)upperInvariant);
             }
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         internal bool VerifyArguments()
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            if (this.ArgumentsMap.ContainsKey("CONNECTIONNAME") && this.ArgumentsMap["CONNECTIONNAME"].IsSet && (this.ArgumentsMap.ContainsKey("OUT") && this.ArgumentsMap["OUT"].IsSet || this.ArgumentsMap.ContainsKey("O") && this.ArgumentsMap["O"].IsSet) || this.ArgumentsMap.ContainsKey("INTERACTIVELOGIN") && this.ArgumentsMap["INTERACTIVELOGIN"].IsSet && (this.ArgumentsMap.ContainsKey("OUT") && this.ArgumentsMap["OUT"].IsSet || this.ArgumentsMap.ContainsKey("O") && this.ArgumentsMap["O"].IsSet) || this.ArgumentsMap.ContainsKey("CONNECTIONSTRING") && this.ArgumentsMap["CONNECTIONSTRING"].IsSet && (this.ArgumentsMap.ContainsKey("OUT") && this.ArgumentsMap["OUT"].IsSet || this.ArgumentsMap.ContainsKey("O") && this.ArgumentsMap["O"].IsSet))
+                return true;
             foreach (CommandLineArgument commandLineArgument in this.ArgumentsMap.Values)
             {
                 if (commandLineArgument.IsRequired && !commandLineArgument.IsSet)
                 {
-                    Trace.TraceInformation("Exiting {0} with false return value because argument {1} is not set.", (object)MethodBase.GetCurrentMethod().Name, (object)commandLineArgument.Name);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0} with false return value because argument {1} is not set.", (object)MethodBase.GetCurrentMethod().Name, (object)commandLineArgument.Name);
                     return false;
                 }
             }
-            Trace.TraceInformation("Exiting {0} with true return value", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0} with true return value", (object)MethodBase.GetCurrentMethod().Name);
             return true;
         }
 
         internal void WriteUsage()
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             Console.Out.WriteLine();
             Console.Out.WriteLine("Options:");
             foreach (CommandLineArgument commandLineArgument in this.Arguments)
@@ -122,7 +133,7 @@ namespace Microsoft.Crm.Services.Utility
             Console.Out.WriteLine("Example:");
             Console.Out.WriteLine(this.GetSampleUsage());
             Console.Out.WriteLine();
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         private string GetSampleUsage()
@@ -137,28 +148,29 @@ namespace Microsoft.Crm.Services.Utility
             return CommandLineArgument.WrapLine(stringBuilder.ToString());
         }
 
+        /// <summary>Populates the command line arguments map.</summary>
         private Dictionary<string, CommandLineArgument> GetPropertyMap()
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             Dictionary<string, CommandLineArgument> propertyMap = new Dictionary<string, CommandLineArgument>();
             foreach (PropertyInfo property in this.ArgumentsSource.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.SetProperty))
             {
-                Trace.TraceInformation("Checking property {0} for command line attribution", (object)property.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Checking property {0} for command line attribution", (object)property.Name);
                 CommandLineArgumentAttribute commandLineAttribute = CommandLineParser.GetCommandLineAttribute(property);
                 if (commandLineAttribute == null)
                 {
-                    Trace.TraceInformation("Skipping property {0} since it does not have command line attribution", (object)property.Name);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Skipping property {0} since it does not have command line attribution", (object)property.Name);
                 }
                 else
                 {
-                    Trace.TraceInformation("Creating CommandLineArgument for Property {0}", (object)property.Name);
+                    CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Creating CommandLineArgument for Property {0}", (object)property.Name);
                     CommandLineArgument commandLineArgument = new CommandLineArgument(property, commandLineAttribute);
                     this.Arguments.Add(commandLineArgument);
                     CommandLineParser.CreateMapEntry(propertyMap, property, commandLineArgument, "shortcut", commandLineArgument.Shortcut);
                     CommandLineParser.CreateMapEntry(propertyMap, property, commandLineArgument, "name", commandLineArgument.Name);
                 }
             }
-            Trace.TraceInformation("Exiting {0} with PropertyMap length of {1} ", (object)MethodBase.GetCurrentMethod().Name, (object)propertyMap.Count);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0} with PropertyMap length of {1} ", (object)MethodBase.GetCurrentMethod().Name, (object)propertyMap.Count);
             return propertyMap;
         }
 
@@ -171,11 +183,11 @@ namespace Microsoft.Crm.Services.Utility
         {
             if (!string.IsNullOrEmpty(value))
             {
-                Trace.TraceInformation("Property {0} has defined a {1} {2}", (object)property.Name, (object)type, (object)value);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Property {0} has defined a {1} {2}", (object)property.Name, (object)type, (object)value);
                 propertyMap.Add(value.ToUpperInvariant(), argument);
                 return true;
             }
-            Trace.TraceWarning("Property {0} does not have a {1} defined", (object)property.Name, (object)type);
+            CrmSvcUtil.crmSvcUtilLogger.TraceWarning("Property {0} does not have a {1} defined", (object)property.Name, (object)type);
             return false;
         }
 

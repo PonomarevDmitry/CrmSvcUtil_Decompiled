@@ -132,6 +132,8 @@
     <Compile Include="DeviceRegistrationResponseError.cs" />
     <Compile Include="LiveDevice.cs" />
     <Compile Include="DeviceUserName.cs" />
+    <Compile Include="IMetadataProviderQueryService.cs" />
+    <Compile Include="MetadataProviderQueryService.cs" />
     <Compile Include="StaticNamingService.cs" />
     <Compile Include="NamingService.cs" />
     <Compile Include="SdkMetadataProviderService.cs" />
@@ -144,9 +146,18 @@
     <Compile Include="ICodeWriterMessageFilterService.cs" />
     <Compile Include="ICustomizeCodeDomService.cs" />
     <Compile Include="IMetadataProviderService.cs" />
+    <Compile Include="IMetadataProviderService2.cs" />
     <Compile Include="INamingService.cs" />
     <Compile Include="ITypeMappingService.cs" />
+    <Compile Include="TraceLogger.cs" />
+    <Compile Include="interactivelogin\crminteractivelogin.xaml.cs" />
     <Compile Include="AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="interactivelogin\crminteractivelogin.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

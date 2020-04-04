@@ -2,6 +2,7 @@ using System;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>An SDK message pair</summary>
     public sealed class SdkMessagePair
     {
         private Guid _id;
@@ -10,6 +11,10 @@ namespace Microsoft.Crm.Services.Utility
         private SdkMessageRequest _sdkMessageRequest;
         private SdkMessageResponse _sdkMessageResponse;
 
+        /// <summary>Constructor</summary>
+        /// <param name="message">SDK message</param>
+        /// <param name="id">Message pair id</param>
+        /// <param name="messageNamespace">Message namespace</param>
         public SdkMessagePair(SdkMessage message, Guid id, string messageNamespace)
         {
             this._message = message;
@@ -17,6 +22,7 @@ namespace Microsoft.Crm.Services.Utility
             this._messageNamespace = messageNamespace;
         }
 
+        /// <summary>Gets the message pair id</summary>
         public Guid Id
         {
             get
@@ -25,6 +31,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the message namespace</summary>
         public string MessageNamespace
         {
             get
@@ -33,6 +40,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message</summary>
         public SdkMessage Message
         {
             get
@@ -45,6 +53,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message request</summary>
         public SdkMessageRequest Request
         {
             get
@@ -57,6 +66,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets or sets the message response</summary>
         public SdkMessageResponse Response
         {
             get

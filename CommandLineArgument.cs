@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -9,10 +8,20 @@ using System.Text;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <remarks>
+    /// Wrapper class for Command Line Argument PropertyInfos.
+    /// </remarks>
     internal sealed class CommandLineArgument
     {
+        /// <summary>Character used to start a new command line paramter.</summary>
         internal const char ArgumentStartChar = '/';
+        /// <summary>
+        /// Character used to seperate command line parameter and value.
+        /// </summary>
         internal const char ArgumentSeparatorChar = ':';
+        /// <summary>
+        /// Format to use when constructing the short form description for an argument.
+        /// </summary>
         private const string ShortFormFormat = "Short form is '{0}{1}{2}'.";
         private PropertyInfo _argumentProperty;
         private CommandLineArgumentAttribute _argumentAttribute;
@@ -22,11 +31,11 @@ namespace Microsoft.Crm.Services.Utility
           PropertyInfo argumentProperty,
           CommandLineArgumentAttribute argumentAttribute)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
-            Trace.TraceInformation("Creating CommandLineArgument for ArgumentProperty {0} and ArgumentAttribute {1}", (object)argumentProperty.Name, (object)argumentAttribute.ToString());
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Creating CommandLineArgument for ArgumentProperty {0} and ArgumentAttribute {1}", (object)argumentProperty.Name, (object)argumentAttribute.ToString());
             this._argumentAttribute = argumentAttribute;
             this._argumentProperty = argumentProperty;
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         internal bool HasShortcut
@@ -156,59 +165,59 @@ namespace Microsoft.Crm.Services.Utility
 
         internal void SetValue(object argTarget, string argValue)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
-            Trace.TraceInformation("Attempting to set the Argument {0} with the value {1}", (object)argTarget.ToString(), (object)CommandLineArgument.ToNullableString((object)argValue));
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Attempting to set the Argument {0} with the value {1}", (object)argTarget.ToString(), (object)CommandLineArgument.ToNullableString((object)argValue));
             if (this.IsSet && !this.SupportsMultiple)
             {
-                Trace.TraceError("Attempt to set argument {0} multiple times", (object)this.ArgumentProperty.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceError("Attempt to set argument {0} multiple times", (object)this.ArgumentProperty.Name);
                 throw new InvalidOperationException(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "Cannot set command line argument {0} multiple times", (object)this.ArgumentProperty.Name));
             }
             if (this.IsCollection)
                 this.PopulateCollectionParameter(argTarget, argValue);
             else if (this.IsFlag)
             {
-                Trace.TraceInformation("Setting flag property {0} to true", (object)this.ArgumentProperty.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Setting flag property {0} to true", (object)this.ArgumentProperty.Name);
                 this.ArgumentProperty.SetValue(argTarget, (object)true, (object[])null);
             }
             else
             {
-                Trace.TraceInformation("Setting property {0} to value {1}", (object)this.ArgumentProperty.Name, (object)CommandLineArgument.ToNullableString((object)argValue));
-                Trace.TraceInformation("Converting parameter value as ArgumentProperty {0} is defined as type {1}.", (object)this.ArgumentProperty.Name, (object)this.ArgumentProperty.PropertyType.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Setting property {0} to value {1}", (object)this.ArgumentProperty.Name, (object)CommandLineArgument.ToNullableString((object)argValue));
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Converting parameter value as ArgumentProperty {0} is defined as type {1}.", (object)this.ArgumentProperty.Name, (object)this.ArgumentProperty.PropertyType.Name);
                 object obj = Convert.ChangeType((object)argValue, this.ArgumentProperty.PropertyType, (IFormatProvider)CultureInfo.InvariantCulture);
                 this.ArgumentProperty.SetValue(argTarget, obj, (object[])null);
             }
             this.IsSet = true;
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         private void PopulateCollectionParameter(object argTarget, string argValue)
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             IList list = this.ArgumentProperty.GetValue(argTarget, (object[])null) as IList;
             if (list == null)
             {
-                Trace.TraceError("ArgumentProperty {0} did not return an IList as expected", (object)this.ArgumentProperty.ToString());
+                CrmSvcUtil.crmSvcUtilLogger.TraceError("ArgumentProperty {0} did not return an IList as expected", (object)this.ArgumentProperty.ToString());
                 throw new InvalidOperationException(string.Format((IFormatProvider)CultureInfo.InvariantCulture, "ArgumentProperty {0} did not return an IList as expected.", (object)this.ArgumentProperty.ToString()));
             }
             Type[] genericArguments = this.ArgumentProperty.PropertyType.GetGenericArguments();
             if (genericArguments == null || genericArguments.Length == 0)
             {
-                Trace.TraceInformation("Adding parameter value directly as ArgumentProperty {0} is not defined as a generic.", (object)this.ArgumentProperty.Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Adding parameter value directly as ArgumentProperty {0} is not defined as a generic.", (object)this.ArgumentProperty.Name);
                 list.Add((object)argValue);
             }
             else
             {
-                Trace.TraceInformation("Casting parameter value as ArgumentProperty {0} is defined as a generic of type {1}.", (object)this.ArgumentProperty.Name, (object)genericArguments[0].Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Casting parameter value as ArgumentProperty {0} is defined as a generic of type {1}.", (object)this.ArgumentProperty.Name, (object)genericArguments[0].Name);
                 object obj = Convert.ChangeType((object)argValue, genericArguments[0], (IFormatProvider)CultureInfo.InvariantCulture);
-                Trace.TraceInformation("Argument value casted to {0} successfully.", (object)genericArguments[0].Name);
+                CrmSvcUtil.crmSvcUtilLogger.TraceInformation("Argument value casted to {0} successfully.", (object)genericArguments[0].Name);
                 list.Add(obj);
             }
-            Trace.TraceInformation("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0}", (object)MethodBase.GetCurrentMethod().Name);
         }
 
         public override string ToString()
         {
-            Trace.TraceInformation("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStart("Entering {0}", (object)MethodBase.GetCurrentMethod().Name);
             StringBuilder stringBuilder1 = new StringBuilder();
             stringBuilder1.AppendLine(this.ToDescriptionString());
             StringBuilder stringBuilder2 = new StringBuilder("  ");
@@ -222,7 +231,7 @@ namespace Microsoft.Crm.Services.Utility
                 stringBuilder2.AppendFormat((IFormatProvider)CultureInfo.InvariantCulture, "  {0}", (object)str);
             }
             stringBuilder1.AppendLine(CommandLineArgument.WrapLine(stringBuilder2.ToString()));
-            Trace.TraceInformation("Exiting {0} with return value {1}", (object)MethodBase.GetCurrentMethod().Name, (object)stringBuilder1.ToString());
+            CrmSvcUtil.crmSvcUtilLogger.TraceMethodStop("Exiting {0} with return value {1}", (object)MethodBase.GetCurrentMethod().Name, (object)stringBuilder1.ToString());
             return stringBuilder1.ToString();
         }
 

@@ -4,14 +4,19 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Device requestration request</summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     [XmlRoot("DeviceAddRequest")]
     public sealed class DeviceRegistrationRequest
     {
+        /// <summary>Default constructor</summary>
         public DeviceRegistrationRequest()
         {
         }
 
+        /// <summary>Constructor</summary>
+        /// <param name="applicationId">Application id</param>
+        /// <param name="device">Device to register</param>
         public DeviceRegistrationRequest(Guid applicationId, LiveDevice device)
           : this()
         {
@@ -29,9 +34,11 @@ namespace Microsoft.Crm.Services.Utility
             };
         }
 
+        /// <summary>Gets or sets the device registration client info</summary>
         [XmlElement("ClientInfo")]
         public DeviceRegistrationClientInfo ClientInfo { get; set; }
 
+        /// <summary>Gets or sets the device registration authentication</summary>
         [XmlElement("Authentication")]
         public DeviceRegistrationAuthentication Authentication { get; set; }
     }

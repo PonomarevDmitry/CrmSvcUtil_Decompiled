@@ -1,16 +1,21 @@
 using Microsoft.Xrm.Sdk.Metadata;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Interface for IOrganization metadata</summary>
     public interface IOrganizationMetadata
     {
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+        /// <summary>
+        /// Array of complete EntityMetadata for the Organization.
+        /// </summary>
         EntityMetadata[] Entities { get; }
 
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays")]
+        /// <summary>
+        /// Array of complete OptionSetMetadata for the Organization.
+        /// </summary>
         OptionSetMetadataBase[] OptionSets { get; }
 
+        /// <summary>All SdkMessages for the Organization.</summary>
         SdkMessages Messages { get; }
     }
 }

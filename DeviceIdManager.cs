@@ -7,10 +7,19 @@ using System.Xml.Serialization;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>Management utility for the Device Id</summary>
     internal static class DeviceIdManager
     {
         private static readonly Random RandomInstance = new Random();
 
+        /// <summary>
+        /// Loads the device credentials (if they exist). If they don't
+        /// </summary>
+        /// <param name="applicationId">Application id</param>
+        /// <param name="issuerUri">URL for the current token issuer</param>
+        /// <remarks>
+        /// The issuerUri can be retrieved from the IServiceConfiguration interface's CurrentIssuer property.
+        /// </remarks>
         public static ClientCredentials LoadOrRegisterDevice(
           Guid applicationId,
           Uri issuerUri)
@@ -18,6 +27,13 @@ namespace Microsoft.Crm.Services.Utility
             return DeviceIdManager.LoadDeviceCredentials(issuerUri) ?? DeviceIdManager.RegisterDevice(applicationId, issuerUri);
         }
 
+        /// <summary>Registers the given device with Live ID</summary>
+        /// <param name="applicationId">ID for the application</param>
+        /// <param name="issuerUri">URL for the current token issuer</param>
+        /// <returns>ClientCredentials that were registered</returns>
+        /// <remarks>
+        /// The issuerUri can be retrieved from the IServiceConfiguration interface's CurrentIssuer property.
+        /// </remarks>
         public static ClientCredentials RegisterDevice(
           Guid applicationId,
           Uri issuerUri)
@@ -25,6 +41,15 @@ namespace Microsoft.Crm.Services.Utility
             return DeviceIdManager.RegisterDevice(applicationId, issuerUri, (string)null, (string)null);
         }
 
+        /// <summary>Registers the given device with Live ID</summary>
+        /// <param name="applicationId">ID for the application</param>
+        /// <param name="issuerUri">URL for the current token issuer</param>
+        /// <param name="deviceName">Device name that should be registered</param>
+        /// <param name="devicePassword">Device password that should be registered</param>
+        /// <returns>ClientCredentials that were registered</returns>
+        /// <remarks>
+        /// The issuerUri can be retrieved from the IServiceConfiguration interface's CurrentIssuer property.
+        /// </remarks>
         public static ClientCredentials RegisterDevice(
           Guid applicationId,
           Uri issuerUri,
@@ -45,6 +70,12 @@ namespace Microsoft.Crm.Services.Utility
             return DeviceIdManager.RegisterDevice(applicationId, issuerUri, userName);
         }
 
+        /// <summary>Loads the device's credentials from the file system</summary>
+        /// <param name="issuerUri">URL for the current token issuer</param>
+        /// <returns>Device Credentials (if set) or null</returns>
+        /// <remarks>
+        /// The issuerUri can be retrieved from the IServiceConfiguration interface's CurrentIssuer property.
+        /// </remarks>
         public static ClientCredentials LoadDeviceCredentials(Uri issuerUri)
         {
             LiveDevice liveDevice = DeviceIdManager.ReadExistingDevice(DeviceIdManager.DiscoverEnvironment(issuerUri));

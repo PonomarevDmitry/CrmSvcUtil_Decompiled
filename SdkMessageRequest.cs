@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Crm.Services.Utility
 {
+    /// <summary>An SDK message request</summary>
     public sealed class SdkMessageRequest
     {
         private Guid _id;
@@ -10,6 +11,10 @@ namespace Microsoft.Crm.Services.Utility
         private string _name;
         private Dictionary<int, SdkMessageRequestField> _requestFields;
 
+        /// <summary>Constructor</summary>
+        /// <param name="message">SDK Message</param>
+        /// <param name="id">Message request id</param>
+        /// <param name="name">Message request name</param>
         public SdkMessageRequest(SdkMessagePair message, Guid id, string name)
         {
             this._id = id;
@@ -18,6 +23,7 @@ namespace Microsoft.Crm.Services.Utility
             this._requestFields = new Dictionary<int, SdkMessageRequestField>();
         }
 
+        /// <summary>Gets the message request id</summary>
         public Guid Id
         {
             get
@@ -26,6 +32,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the message pair of the request</summary>
         public SdkMessagePair MessagePair
         {
             get
@@ -34,6 +41,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets the message request name</summary>
         public string Name
         {
             get
@@ -42,6 +50,7 @@ namespace Microsoft.Crm.Services.Utility
             }
         }
 
+        /// <summary>Gets a dictionary of message request fields</summary>
         public Dictionary<int, SdkMessageRequestField> RequestFields
         {
             get
