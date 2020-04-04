@@ -1,56 +1,50 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: Microsoft.Crm.Services.Utility.StaticNamingService
-// Assembly: CrmSvcUtil, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35
-// MVID: 756175FA-E97D-49FF-B443-B7A725C9F163
-// Assembly location: C:\Users\dmitriy.ponomarev\AppData\Roaming\MscrmTools\XrmToolBox\NugetPlugins\DLaB.Xrm.EarlyBoundGenerator.1.2019.3.19\lib\net462\plugins\DLaB.EarlyBoundGenerator\CrmSvcUtil.exe
-
 using Microsoft.Xrm.Sdk.Metadata;
 using System.Collections.Generic;
 
 namespace Microsoft.Crm.Services.Utility
 {
-  internal static class StaticNamingService
-  {
-    private static Dictionary<string, string> _attributeNames;
-
-    public static string GetNameForEntity(EntityMetadata entityMetadata)
+    internal static class StaticNamingService
     {
-      switch (entityMetadata.LogicalName)
-      {
-        case "activitymimeattachment":
-          return "ActivityMimeAttachment";
-        case "monthlyfiscalcalendar":
-          return "MonthlyFiscalCalendar";
-        case "fixedmonthlyfiscalcalendar":
-          return "FixedMonthlyFiscalCalendar";
-        case "quarterlyfiscalcalendar":
-          return "QuarterlyFiscalCalendar";
-        case "semiannualfiscalcalendar":
-          return "SemiAnnualFiscalCalendar";
-        case "annualfiscalcalendar":
-          return "AnnualFiscalCalendar";
-        default:
-          return string.Empty;
-      }
-    }
+        private static Dictionary<string, string> _attributeNames;
 
-    public static string GetNameForAttribute(AttributeMetadata attributeMetadata)
-    {
-      if (!StaticNamingService._attributeNames.ContainsKey(attributeMetadata.LogicalName))
-        return (string) null;
-      return StaticNamingService._attributeNames[attributeMetadata.LogicalName];
-    }
+        public static string GetNameForEntity(EntityMetadata entityMetadata)
+        {
+            switch (entityMetadata.LogicalName)
+            {
+                case "activitymimeattachment":
+                    return "ActivityMimeAttachment";
+                case "monthlyfiscalcalendar":
+                    return "MonthlyFiscalCalendar";
+                case "fixedmonthlyfiscalcalendar":
+                    return "FixedMonthlyFiscalCalendar";
+                case "quarterlyfiscalcalendar":
+                    return "QuarterlyFiscalCalendar";
+                case "semiannualfiscalcalendar":
+                    return "SemiAnnualFiscalCalendar";
+                case "annualfiscalcalendar":
+                    return "AnnualFiscalCalendar";
+                default:
+                    return string.Empty;
+            }
+        }
 
-    static StaticNamingService()
-    {
-      StaticNamingService.InitializeAtributeNames();
-    }
+        public static string GetNameForAttribute(AttributeMetadata attributeMetadata)
+        {
+            if (!StaticNamingService._attributeNames.ContainsKey(attributeMetadata.LogicalName))
+                return (string)null;
+            return StaticNamingService._attributeNames[attributeMetadata.LogicalName];
+        }
 
-    private static void InitializeAtributeNames()
-    {
-      if (StaticNamingService._attributeNames != null)
-        return;
-      StaticNamingService._attributeNames = new Dictionary<string, string>()
+        static StaticNamingService()
+        {
+            StaticNamingService.InitializeAtributeNames();
+        }
+
+        private static void InitializeAtributeNames()
+        {
+            if (StaticNamingService._attributeNames != null)
+                return;
+            StaticNamingService._attributeNames = new Dictionary<string, string>()
       {
         {
           "month1",
@@ -225,6 +219,6 @@ namespace Microsoft.Crm.Services.Utility
           "Bcc"
         }
       };
+        }
     }
-  }
 }
